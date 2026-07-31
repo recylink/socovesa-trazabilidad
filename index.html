@@ -1,0 +1,2436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trazabilidad · Recylink</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --g25:#FCFCFD;--g50:#F9FAFB;--g100:#F2F4F7;--g200:#E4E7EC;--g300:#D0D5DD;
+  --g400:#98A2B3;--g500:#667085;--g600:#475467;--g700:#344054;--g800:#1D2939;--g900:#101828;
+  --p200:#B3DFF5;--p500:#0083C0;--p600:#0069A6;--p700:#00528B;
+  --err:#F04438;--warn:#F79009;--ok:#039855;--na:#667085;
+  --err-l:#FEE4E2;--warn-l:#FEF0C7;--ok-l:#D1FADF;--na-l:#F2F4F7;
+  --bd:var(--g200);--tx:var(--g900);--tx2:var(--g600);--brand:var(--p600);
+}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--g100);color:var(--tx);font-size:14px;min-height:100vh;}
+.topbar{background:#fff;border-bottom:1px solid var(--bd);padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200;}
+.logo{display:flex;align-items:center;gap:12px;}
+.logo img{height:28px;width:auto;display:block;}
+.logo-sep{color:var(--g300);margin:0 2px;}
+.logo-sub{font-size:12px;color:var(--tx2);font-weight:600;}
+.top-right{display:flex;align-items:center;gap:10px;}
+.month-sel{display:flex;align-items:center;gap:6px;padding:6px 12px;border:1.5px solid var(--bd);border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;color:var(--g700);background:#fff;}
+.month-sel select{border:none;outline:none;font-family:inherit;font-size:12px;font-weight:600;color:var(--g700);background:transparent;cursor:pointer;}
+.layout{display:flex;min-height:calc(100vh - 58px);}
+.sidebar{width:232px;background:#fff;border-right:1px solid var(--bd);flex-shrink:0;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;}
+.sb-section{padding:16px 16px 6px;font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.7px;}
+.sb-item{display:flex;align-items:center;gap:9px;padding:8px 16px;cursor:pointer;border-left:3px solid transparent;transition:all .12s;}
+.sb-item:hover{background:var(--g50);}
+.sb-item.active{background:#EBF5FC;border-left-color:var(--brand);}
+.sb-item.active .sb-name{color:var(--brand);font-weight:700;}
+.sb-group{margin-bottom:2px;}
+.sb-group-hdr{display:flex;align-items:center;gap:8px;padding:7px 16px 7px 14px;cursor:pointer;background:var(--g50);border-left:3px solid transparent;transition:all .12s;user-select:none;}
+.sb-group-hdr:hover{background:var(--g100);}
+.sb-group-hdr.open{border-left-color:var(--brand);}
+.sb-group-logo{width:28px;height:28px;border-radius:6px;object-fit:contain;background:#fff;border:1px solid var(--g200);padding:2px;flex-shrink:0;}
+.sb-group-av{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+.sb-group-name{font-size:12px;font-weight:700;color:var(--g800);flex:1;}
+.sb-group-count{font-size:10px;color:var(--tx2);background:var(--g200);padding:1px 6px;border-radius:999px;}
+.sb-chevron{font-size:10px;color:var(--g400);transition:transform .18s;flex-shrink:0;}
+.sb-chevron.open{transform:rotate(90deg);}
+.sb-children{overflow:hidden;transition:max-height .2s ease;}
+.sb-suc{display:flex;align-items:center;gap:8px;padding:6px 16px 6px 28px;cursor:pointer;border-left:3px solid transparent;transition:all .12s;}
+.sb-suc:hover{background:var(--g25);}
+.sb-suc.active{background:#EBF5FC;border-left-color:var(--brand);}
+.sb-suc.active .sb-suc-name{color:var(--brand);font-weight:700;}
+.sb-suc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.sb-suc-info{flex:1;min-width:0;}
+.sb-suc-name{font-size:11px;font-weight:600;color:var(--g600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-suc-pct{font-size:10px;font-weight:700;flex-shrink:0;}
+.sb-info{flex:1;min-width:0;}
+.sb-name{font-size:12px;font-weight:600;color:var(--g700);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-sub{font-size:10px;color:var(--tx2);}
+.sb-pct{font-size:11px;font-weight:700;flex-shrink:0;}
+.sb-divider{height:1px;background:var(--bd);margin:8px 16px;}
+.main{flex:1;padding:24px 28px;min-width:0;overflow-x:hidden;}
+.kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+.kpi{background:#fff;border:1px solid var(--bd);border-radius:12px;padding:14px 16px;}
+.kpi-lbl{font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;}
+.kpi-val{font-size:24px;font-weight:700;line-height:1;}
+.kpi-desc{font-size:10px;color:var(--tx2);margin-top:3px;}
+.kpi.highlight{border-color:var(--p500);background:#EBF5FC;}
+.kpi.highlight .kpi-lbl{color:var(--brand);}
+.emp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.emp-title{display:flex;align-items:center;gap:10px;}
+.emp-av{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;}
+.emp-name{font-size:16px;font-weight:700;}
+.vtabs{display:flex;border-bottom:1.5px solid var(--bd);margin-bottom:18px;}
+.vtab{padding:8px 16px;font-size:13px;font-weight:600;color:var(--tx2);cursor:pointer;border:none;background:none;font-family:inherit;border-bottom:2.5px solid transparent;margin-bottom:-1.5px;display:flex;align-items:center;gap:5px;transition:color .12s;}
+.vtab:hover{color:var(--brand);}
+.vtab.active{color:var(--brand);border-bottom-color:var(--brand);}
+.vtab-badge{background:var(--g100);color:var(--g600);padding:1px 6px;border-radius:999px;font-size:10px;font-weight:700;}
+.vtab.active .vtab-badge{background:var(--p200);color:var(--p700);}
+.card{background:#fff;border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.card-header{padding:12px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:13px;font-weight:700;}
+.card-sub{font-size:11px;color:var(--tx2);}
+.prog-wrap{display:flex;align-items:center;gap:8px;}
+.prog-bg{height:8px;border-radius:999px;background:var(--g100);overflow:hidden;}
+.prog-fill{height:100%;border-radius:999px;transition:width .4s;}
+.prog-lbl{font-size:12px;font-weight:700;}
+table{width:100%;border-collapse:collapse;}
+th{padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:left;border-bottom:1px solid var(--bd);background:var(--g50);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+td{padding:9px 12px;font-size:12px;border-bottom:1px solid var(--g100);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--g25);}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;white-space:nowrap;}
+.b-ok{background:var(--ok-l);color:var(--ok);}
+.b-falta{background:var(--err-l);color:var(--err);}
+.b-na{background:var(--na-l);color:var(--na);}
+.filters{display:flex;align-items:center;gap:6px;padding:9px 16px;border-bottom:1px solid var(--bd);background:var(--g50);flex-wrap:wrap;}
+.fbtn{padding:4px 10px;border:1.5px solid var(--bd);border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;background:#fff;color:var(--tx2);font-family:inherit;transition:all .12s;}
+.fbtn:hover,.fbtn.on{background:var(--brand);color:#fff;border-color:var(--brand);}
+.res-tag{background:var(--g100);color:var(--g700);padding:2px 7px;border-radius:5px;font-size:10px;font-weight:700;}
+.falta-banner{padding:9px 16px;background:var(--err-l);font-size:12px;color:var(--err);font-weight:600;border-top:1px solid var(--bd);}
+.obs-banner{padding:9px 16px;background:var(--warn-l);font-size:12px;color:#92400E;border-top:1px solid var(--bd);}
+.falta-summary{background:#fff;border:1px solid var(--err);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.falta-sum-header{padding:11px 18px;background:var(--err-l);display:flex;align-items:center;gap:8px;}
+.falta-sum-title{font-size:12px;font-weight:700;color:var(--err);}
+.falta-items{padding:12px 18px;display:flex;flex-direction:column;gap:7px;}
+.falta-item{display:flex;align-items:flex-start;gap:10px;padding:9px 12px;background:var(--g50);border-radius:8px;border:1px solid var(--g100);}
+.falta-residuo{font-size:12px;font-weight:700;color:var(--g800);min-width:130px;flex-shrink:0;}
+.falta-docs{font-size:11px;color:var(--err);line-height:1.5;}
+/* PENDIENTE DESCRIPCION */
+.pend-box{background:#fff;border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.pend-header{padding:12px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
+.pend-title{font-size:13px;font-weight:700;}
+.pend-body{padding:14px 18px;}
+.pend-textarea{width:100%;min-height:80px;padding:10px 12px;border:1.5px solid var(--bd);border-radius:8px;font-family:inherit;font-size:12px;color:var(--tx);background:var(--g50);resize:vertical;outline:none;transition:border-color .15s;}
+.pend-textarea:focus{border-color:var(--brand);background:#fff;}
+.pend-saved{padding:10px 18px;background:var(--ok-l);font-size:12px;color:var(--ok);font-weight:600;display:none;}
+.pend-btn{margin-top:8px;padding:7px 16px;background:var(--brand);color:#fff;border:none;border-radius:7px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;}
+.pend-btn:hover{background:var(--p500);}
+/* CSE */
+.cse-section{background:#fff;border:1px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.cse-header{padding:12px 18px;background:var(--g50);border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;}
+.cse-title{font-size:13px;font-weight:700;color:var(--brand);}
+.cse-pct-big{font-size:26px;font-weight:700;}
+.cse-row{display:grid;grid-template-columns:repeat(3,1fr);gap:0;}
+.cse-item{padding:14px 16px;border-right:1px solid var(--bd);}
+.cse-item:last-child{border-right:none;}
+.cse-item-lbl{font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;}
+.cse-months{display:flex;gap:4px;flex-wrap:wrap;}
+.cse-month{display:flex;flex-direction:column;align-items:center;gap:2px;}
+.cse-month-name{font-size:9px;color:var(--tx2);font-weight:600;}
+.cse-dot{width:20px;height:20px;border-radius:5px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;}
+.dot-ok{background:var(--ok-l);color:var(--ok);}
+.dot-no{background:var(--err-l);color:var(--err);}
+.dot-na{background:var(--g100);color:var(--g400);}
+.dot-fut{background:var(--g100);color:var(--g300);}
+/* ANUAL */
+.ann-wrap{overflow-x:auto;}
+.ann-table{min-width:860px;border-collapse:collapse;width:100%;}
+.ann-table th{padding:7px 8px;font-size:9px;font-weight:700;color:var(--tx2);text-align:center;border-bottom:1px solid var(--bd);background:var(--g50);text-transform:uppercase;letter-spacing:.3px;}
+.ann-table th:first-child{text-align:left;min-width:170px;padding-left:14px;}
+.ann-table td{padding:7px 8px;font-size:12px;border-bottom:1px solid var(--g100);text-align:center;}
+.ann-table td:first-child{text-align:left;font-size:11px;font-weight:600;color:var(--g700);padding-left:14px;}
+.ann-table tr:last-child td{border-bottom:none;}
+.cell-ok{color:var(--ok);font-size:14px;font-weight:700;}
+.cell-no{color:var(--err);font-size:14px;font-weight:700;}
+.cell-na2{color:var(--g400);font-size:12px;}
+.cell-fut{color:var(--g200);font-size:12px;}
+.ann-sep td{font-size:10px!important;font-weight:700!important;color:var(--tx2)!important;text-transform:uppercase;letter-spacing:.4px;padding:6px 8px!important;padding-left:14px!important;background:var(--g50)!important;border-bottom:1px solid var(--bd)!important;}
+.residuos-cell{font-size:10px;color:var(--g700);text-align:left!important;line-height:1.6;max-width:160px;}
+.ann-falta-cell{font-size:10px;color:var(--err);text-align:left!important;line-height:1.4;max-width:150px;}
+.ann-obs-cell{font-size:10px;color:var(--g600);text-align:left!important;max-width:150px;}
+/* OBJETIVOS */
+.obj-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:14px 18px;}
+.obj-item{padding:12px 14px;border:1px solid var(--bd);border-radius:10px;background:var(--g50);}
+.obj-text{font-size:12px;font-weight:600;color:var(--g700);margin-bottom:8px;}
+.obj-prog{display:flex;align-items:center;gap:8px;}
+.obj-num{font-size:13px;font-weight:700;}
+/* VALORIZACIÓN */
+.val-chip{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700;white-space:nowrap;}
+.val-chip-ok{background:var(--ok-l);color:var(--ok);}
+.val-chip-warn{background:var(--warn-l);color:#92400E;}
+.val-chip-err{background:var(--err-l);color:var(--err);}
+.val-chip-na{background:var(--na-l);color:var(--na);}
+/* Banner de brecha vs meta — traduce el cumplimiento binario del objetivo en avance parcial */
+.val-gap{padding:10px 14px;border-radius:10px;border:1px solid var(--bd);margin-bottom:14px;font-size:12px;}
+.val-gap-t{font-weight:700;margin-bottom:2px;}
+.val-gap-d{font-size:11px;opacity:.85;}
+.val-gap-n{font-size:10px;color:var(--g400);margin-top:4px;}
+.val-gap-ok{background:var(--ok-l);color:var(--ok);border-color:var(--ok);}
+.val-gap-warn{background:var(--warn-l);color:#92400E;}
+.val-gap-err{background:var(--err-l);color:var(--err);}
+.val-gap-na{background:var(--na-l);color:var(--na);}
+.vt-wrap{overflow-x:auto;}
+.vt-table{min-width:900px;border-collapse:collapse;width:100%;}
+.vt-table th{padding:8px 10px;font-size:9px;font-weight:700;color:var(--tx2);text-align:center;border-bottom:1px solid var(--bd);background:var(--g50);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
+.vt-table th.th-left{text-align:left;min-width:160px;padding-left:16px;}
+.vt-table th.th-avance{min-width:150px;text-align:left;padding-left:10px;}
+.vt-table th.th-mes{min-width:62px;}
+.vt-table td{padding:0;border-bottom:1px solid var(--g100);vertical-align:middle;}
+.vt-table tr:last-child td{border-bottom:none;}
+.vt-table tr:hover td{background:var(--g25);}
+.vt-emp-cell{padding:12px 10px 12px 16px;display:flex;flex-direction:column;gap:2px;}
+.vt-emp-name{font-size:12px;font-weight:700;color:var(--g800);}
+.vt-emp-suc{font-size:10px;color:var(--tx2);}
+.vt-meta-cell{padding:10px;text-align:center;}
+.vt-meta-pct{font-size:15px;font-weight:700;color:var(--g700);}
+.vt-meta-lbl{font-size:9px;color:var(--g400);font-weight:600;text-transform:uppercase;letter-spacing:.3px;}
+.vt-avance-cell{padding:10px 14px 10px 10px;}
+.vt-avance-wrap{display:flex;align-items:center;gap:8px;}
+.vt-avance-track{flex:1;height:10px;background:var(--g100);border-radius:999px;overflow:hidden;position:relative;}
+.vt-avance-fill{height:100%;border-radius:999px;transition:width .5s;}
+.vt-avance-nums{font-size:11px;font-weight:700;white-space:nowrap;min-width:52px;text-align:right;}
+.vt-mes-cell{padding:8px 6px;text-align:center;}
+.vt-mes-pct{font-size:13px;font-weight:700;display:block;line-height:1;}
+.vt-mes-bar{width:28px;height:4px;border-radius:999px;margin:4px auto 0;background:var(--g100);overflow:hidden;}
+.vt-mes-bar-fill{height:100%;border-radius:999px;}
+.vt-mes-na{color:var(--g300);font-size:11px;}
+.vt-mes-fut{color:var(--g200);font-size:11px;}
+.vt-mes-activo{background:#EBF5FC!important;}
+.vt-sep td{background:var(--g50)!important;padding:5px 16px!important;font-size:9px!important;font-weight:700!important;color:var(--g400)!important;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--bd)!important;}
+.val-kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.legend{display:flex;gap:12px;flex-wrap:wrap;padding:9px 16px;border-top:1px solid var(--bd);background:var(--g50);}
+.leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--tx2);}
+.empty{padding:40px;text-align:center;color:var(--tx2);font-size:12px;}
+.sidebar{width:232px;background:#fff;border-right:1px solid var(--bd);flex-shrink:0;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;}
+@media(max-width:900px){.kpi-row{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:1100px){.main [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important;}}
+
+
+@media(max-width:1100px){.main [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important;}}
+
+
+/* ── BOTÓN EXPORTAR ── */
+.btn-export{display:flex;align-items:center;gap:6px;padding:7px 14px;background:var(--brand);color:#fff;border:none;border-radius:8px;font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:background .12s;}
+.btn-export:hover{background:var(--p500);}
+.btn-export svg{flex-shrink:0;}
+
+/* ── MODAL DE EXPORTACIÓN ── */
+.export-overlay{display:none;position:fixed;inset:0;background:rgba(16,24,40,.45);z-index:500;align-items:center;justify-content:center;}
+.export-overlay.open{display:flex;}
+.export-modal{background:#fff;border-radius:14px;padding:28px;width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.18);}
+.export-modal-title{font-size:15px;font-weight:700;color:var(--g900);margin-bottom:4px;}
+.export-modal-sub{font-size:12px;color:var(--tx2);margin-bottom:20px;}
+.export-opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--bd);border-radius:10px;margin-bottom:10px;cursor:pointer;transition:all .12s;}
+.export-opt:hover{border-color:var(--brand);background:var(--g50);}
+.export-opt-icon{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.export-opt-name{font-size:13px;font-weight:600;color:var(--g800);}
+.export-opt-desc{font-size:11px;color:var(--tx2);margin-top:1px;}
+.export-cancel{width:100%;padding:8px;border:1.5px solid var(--bd);border-radius:8px;background:transparent;font-family:inherit;font-size:12px;font-weight:600;color:var(--g500);cursor:pointer;margin-top:4px;}
+.export-cancel:hover{background:var(--g50);}
+
+/* ── ESTILOS DE IMPRESIÓN PDF ── */
+@media print {
+  @page { size: A4 landscape; margin: 10mm 10mm 10mm 10mm; }
+  @page :first { margin-top: 10mm; }
+  body { background: #fff !important; font-size: 8px !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* Ocultar UI de navegación */
+  .topbar, .sidebar, .btn-export, .export-overlay, .vtabs,
+  .filters, .pend-body, .month-sel, #empSelWrap,
+  .sb-section, .sb-divider, .pend-box { display: none !important; }
+
+  /* Layout */
+  .layout { display: block !important; }
+  .main   { padding: 0 !important; max-width: 100% !important; }
+
+  /* Cabecera de impresión */
+  .print-header { display: flex !important; }
+
+  /* Cards */
+  .card {
+    box-shadow: none !important;
+    border: 0.5px solid #D0D5DD !important;
+    margin-bottom: 8px !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  /* KPIs — fila horizontal compacta */
+  .kpi-row {
+    display: grid !important;
+    grid-template-columns: repeat(5,1fr) !important;
+    gap: 5px !important;
+    margin-bottom: 8px !important;
+  }
+  .kpi { padding: 7px 9px !important; }
+  .kpi-val { font-size: 18px !important; }
+  .kpi-lbl { font-size: 8px !important; }
+  .kpi-desc { font-size: 8px !important; }
+
+  /* Tabla mensual principal — cabe en landscape A4 */
+  .card table,
+  .ann-table,
+  .vt-table {
+    width: 100% !important;
+    min-width: unset !important;
+    font-size: 7.5px !important;
+    table-layout: fixed;
+  }
+  th {
+    font-size: 7px !important;
+    padding: 4px 4px !important;
+    white-space: normal !important;
+    word-break: break-word;
+  }
+  td {
+    font-size: 7.5px !important;
+    padding: 4px 4px !important;
+    vertical-align: middle !important;
+  }
+
+  /* Badges más pequeños en impresión */
+  .badge {
+    font-size: 7px !important;
+    padding: 1px 4px !important;
+    white-space: nowrap;
+  }
+  .res-tag { font-size: 7.5px !important; padding: 1px 4px !important; }
+
+  /* Quitar scroll horizontal — todo visible */
+  div[style*="overflow-x:auto"],
+  div[style*="overflow-x: auto"],
+  .ann-wrap, .vt-wrap { overflow: visible !important; }
+
+  /* Anchos de columna fijos para la tabla de trazabilidad */
+  .col-residuo  { width: 13% !important; }
+  .col-imp      { width: 6%  !important; }
+  .col-doc      { width: 9%  !important; } /* 8 columnas × 9% = 72% + 13% + 6% = 91% */
+
+  /* Progreso bars */
+  .prog-bg, .prog-fill, .vt-avance-fill,
+  .vt-mes-bar-fill, .av-fill, .bar-fill,
+  .val-gap { print-color-adjust: exact !important; }
+
+  /* Ocultar elementos secundarios en impresión */
+  .legend { display: none !important; }
+  .emp-header { margin-bottom: 6px !important; }
+  .emp-name { font-size: 11px !important; }
+
+  /* CSE dots */
+  .cse-dot { width: 16px !important; height: 16px !important; font-size: 9px !important; }
+  .cse-row { display: grid; grid-template-columns: repeat(3,1fr); }
+
+  /* Saltos de página */
+  .card + .card { page-break-before: auto; }
+}
+.print-header { display: none; align-items: center; justify-content: space-between;
+  padding: 0 0 14px; border-bottom: 2px solid #0069A6; margin-bottom: 14px; }
+.print-header img { height: 24px; }
+.print-header-info { text-align: right; font-size: 10px; color: #667085; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo">
+    <img src="/mnt/user-data/uploads/LOGO_RECYLINK__COLOR_HORIZONTAL.webp" alt="Recylink" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <div style="display:none;align-items:center;gap:8px;">
+      <div style="width:28px;height:28px;background:var(--brand);border-radius:7px;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" style="stroke:#fff;width:16px;height:16px;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></div>
+      <span style="font-size:16px;font-weight:700;color:var(--g900);">Recylink</span>
+    </div>
+    <span class="logo-sep">·</span>
+    <span class="logo-sub" id="topEmpresa">Trazabilidad · Recylink</span>
+  </div>
+  <div class="top-right">
+
+    <!-- SELECTOR MES -->
+    <div class="month-sel">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#667085" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <select id="selMes" onchange="setMes(this.value)">
+        <option value="Enero">Enero 2026</option>
+        <option value="Febrero">Febrero 2026</option>
+        <option value="Marzo">Marzo 2026</option>
+        <option value="Abril" selected>Abril 2026</option>
+        <option value="Mayo">Mayo 2026</option>
+        <option value="Junio">Junio 2026</option>
+      </select>
+    </div>
+    
+    <button class="btn-export" onclick="abrirExport()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Exportar informe
+    </button>
+  </div>
+</div>
+
+<!-- MODAL EXPORTAR -->
+<div class="export-overlay" id="exportOverlay" onclick="if(event.target===this)cerrarExport()">
+  <div class="export-modal">
+    <div class="export-modal-title">Exportar informe de trazabilidad</div>
+    <div class="export-modal-sub" id="exportSubtitle"></div>
+    <div class="export-opt" onclick="exportarPDF()">
+      <div class="export-opt-icon" style="background:#FEE4E2;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#F04438" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      </div>
+      <div>
+        <div class="export-opt-name">Descargar como PDF</div>
+        <div class="export-opt-desc">Imprime la vista actual — mes seleccionado + empresa activa</div>
+      </div>
+    </div>
+    <div class="export-opt" onclick="exportarPrint()">
+      <div class="export-opt-icon" style="background:#EFF8FF;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#175CD3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      </div>
+      <div>
+        <div class="export-opt-name">Imprimir</div>
+        <div class="export-opt-desc">Abre el diálogo de impresión del navegador</div>
+      </div>
+    </div>
+    <button class="export-cancel" onclick="cerrarExport()">Cancelar</button>
+  </div>
+</div>
+
+
+<div class="layout">
+  <div class="sidebar" id="sidebar"></div>
+  <div class="main" id="main"></div>
+</div>
+
+<script>
+// ============================================================
+// ★ CONFIGURACIÓN DE LA EMPRESA — EDITAR AQUÍ
+// ============================================================
+const EMPRESA_NOMBRE  = "Socovesa";
+const EMPRESA_COLOR   = "#B54708";        // ← color hex de la empresa
+const EMPRESA_COLOR_L = "#FFF6ED";        // ← color claro (fondo)
+
+// ============================================================
+// ★ CONEXIÓN CON GOOGLE SHEETS (Apps Script Web App) — EDITAR AQUÍ
+// Pega aquí la URL /exec que te entrega Apps Script al implementar
+// Code.gs DENTRO de la planilla "Socovesa" (Extensiones → Apps Script).
+// ============================================================
+const DATA_SOURCE_URL = "https://script.google.com/macros/s/AKfycbx5mKQ873Ob_3Yd4n1kUI5imxEpXO5UzllhMpYGCoIBFHwBKSI9Moct7p9SYuEL9znM/exec";
+// Cada cuántos minutos se refresca el dato en segundo plano (sin recargar la página)
+const REFRESH_MINUTOS = 5;
+
+// ============================================================
+// CONSTANTES
+// ============================================================
+const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+let MESES_ACTIVOS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio"];
+// (ya no se usa un "mes futuro fijo": esFuturo() se calcula directo desde MESES_ACTIVOS)
+// ── Grupos de docs para la vista mensual dividida ─────────
+const DOCS_TRAZO_COLS = ["Transportista","Disposición final"];               // trazabilidad
+const DOCS_DOC_COLS   = ["Cert. tratamiento","Factura","Cert. declaración"]; // documentos
+
+// ============================================================
+// CATÁLOGO DE RESIDUOS — 139 tipos con código LER
+// ============================================================
+const CATALOGO_RESIDUOS = [
+  {nombre:"Aceite de Cocina", codigo:"ACDECO"},
+  {nombre:"Aceite Lubricante", codigo:"ACELUB"},
+  {nombre:"Acero Inoxidable", codigo:"ACEINO"},
+  {nombre:"Agua con HC", codigo:"AGCOHC"},
+  {nombre:"Aguas contaminadas con HC", codigo:"AGCOCO"},
+  {nombre:"Aguas Grises", codigo:"AGUGRI"},
+  {nombre:"Aguas Servidas", codigo:"AGUSER"},
+  {nombre:"Alucom", codigo:"ALUC"},
+  {nombre:"Aluminio", codigo:"ALUM"},
+  {nombre:"Animal", codigo:"ANIM"},
+  {nombre:"Arena", codigo:"AREN"},
+  {nombre:"Asbesto friable", codigo:"ASBFRI"},
+  {nombre:"Asbesto no friable", codigo:"ASNOFR"},
+  {nombre:"Asesoría", codigo:"ASES"},
+  {nombre:"Batería de Auto", codigo:"BADEAU"},
+  {nombre:"Biciclaje", codigo:"BICI"},
+  {nombre:"Bidón Químico HDPE", codigo:"BIQUHD"},
+  {nombre:"Binz", codigo:"BINZ"},
+  {nombre:"Biocontaminados", codigo:"BIOC"},
+  {nombre:"Biodigestión", codigo:"BIOD"},
+  {nombre:"Biodigestores", codigo:"BIOD2"},
+  {nombre:"Biogas", codigo:"BIOG"},
+  {nombre:"Bodegas", codigo:"BODE"},
+  {nombre:"Bolsa plástica", codigo:"BOLPLA"},
+  {nombre:"Bolsos", codigo:"BOLS"},
+  {nombre:"Bronce", codigo:"BRON"},
+  {nombre:"Cables Eléctricos", codigo:"CABELE"},
+  {nombre:"Capacitaciones", codigo:"CAPA"},
+  {nombre:"Caracterización de residuos", codigo:"CADERE"},
+  {nombre:"Carbono neutral", codigo:"CARNEU"},
+  {nombre:"Cárnicos", codigo:"CARN"},
+  {nombre:"Cartón", codigo:"CART"},
+  {nombre:"Celulosa reciclada", codigo:"CELREC"},
+  {nombre:"Cerámica", codigo:"CERA"},
+  {nombre:"Chatarra", codigo:"CHAT"},
+  {nombre:"Cobre", codigo:"COBR"},
+  {nombre:"Colchones", codigo:"COLC"},
+  {nombre:"Colillas", codigo:"COLI"},
+  {nombre:"Domiciliarios", codigo:"DOMI"},
+  {nombre:"E-waste", codigo:"EWAS"},
+  {nombre:"EPP", codigo:"EPP"},
+  {nombre:"Escombro", codigo:"ESCO"},
+  {nombre:"Escoria", codigo:"ESCO2"},
+  {nombre:"Excavación", codigo:"EXCA"},
+  {nombre:"Fierro", codigo:"FIER"},
+  {nombre:"Film Stretch", codigo:"FILSTR"},
+  {nombre:"Grasas", codigo:"GRAS"},
+  {nombre:"HDPE", codigo:"HDPE"},
+  {nombre:"Hormigón", codigo:"HORM"},
+  {nombre:"Industrial", codigo:"INDU"},
+  {nombre:"Latas de Aluminio", codigo:"LADEAL"},
+  {nombre:"LDPE", codigo:"LDPE"},
+  {nombre:"Libros", codigo:"LIBR"},
+  {nombre:"Lodos", codigo:"LODO"},
+  {nombre:"Madera", codigo:"MADE"},
+  {nombre:"Maxisacos", codigo:"MAXI"},
+  {nombre:"Metales no ferrosos", codigo:"MENOFE"},
+  {nombre:"Mix Papel-Cartón", codigo:"MIXPAP"},
+  {nombre:"Mix Plásticos", codigo:"MIXPLA"},
+  {nombre:"Motores", codigo:"MOTO"},
+  {nombre:"Neumáticos", codigo:"NEUM"},
+  {nombre:"NFU", codigo:"NFU"},
+  {nombre:"Orgánicos", codigo:"ORGA"},
+  {nombre:"Pallet", codigo:"PALL"},
+  {nombre:"Papel", codigo:"PAPE"},
+  {nombre:"PET", codigo:"PET"},
+  {nombre:"Pilas Alcalinas", codigo:"PILALC"},
+  {nombre:"Placas electrónicas", codigo:"PLAELE"},
+  {nombre:"Plásticos", codigo:"PLAS"},
+  {nombre:"Plásticos Compostables", codigo:"PLACOM"},
+  {nombre:"Plumavit", codigo:"PLUM3"},
+  {nombre:"PP", codigo:"PP"},
+  {nombre:"PVC", codigo:"PVC"},
+  {nombre:"Radiadores", codigo:"RADI"},
+  {nombre:"RAEE", codigo:"RAEE"},
+  {nombre:"Ramas", codigo:"RAMA"},
+  {nombre:"RCD", codigo:"RCD"},
+  {nombre:"RESPEL", codigo:"RESP"},
+  {nombre:"RILES", codigo:"RILE"},
+  {nombre:"Tambor Contaminado", codigo:"TAMCON"},
+  {nombre:"Tambor Metálico", codigo:"TAMMET"},
+  {nombre:"Tambores", codigo:"TAMB"},
+  {nombre:"Tela gráfica", codigo:"TELGRA"},
+  {nombre:"Tetrapack", codigo:"TETR"},
+  {nombre:"Textil", codigo:"TEXT"},
+  {nombre:"Tierra", codigo:"TIER"},
+  {nombre:"Tóner", codigo:"TONE"},
+  {nombre:"Vidrio", codigo:"VIDR"},
+  {nombre:"Yeso-Cartón", codigo:"YESO"}
+];
+
+// Lookup rápido nombre → código
+const COD = {};
+CATALOGO_RESIDUOS.forEach(r=>COD[r.nombre]=r.codigo);
+
+// ============================================================
+// METAS EDITABLES — separadas de EMPRESAS para edición en vivo
+// ============================================================
+const METAS_STORE = {};
+function getMeta(empId){ return METAS_STORE[empId] ?? VAL_DATA[empId]?.meta ?? null; }
+function setMeta(empId, val){ METAS_STORE[empId] = val; renderSidebar(); renderMain(); }
+
+// ============================================================
+// RESIDUOS ACTIVOS POR MES — qué residuos aplican cada mes/empresa
+// El usuario puede activar/desactivar desde el filtro del visor
+// Estructura: RESIDUOS_ACTIVOS[empId][mes] = Set de nombres de residuo
+// Si no existe → muestra todos los que tienen imp>0 en los datos
+// ============================================================
+const RESIDUOS_ACTIVOS = {};
+
+// ── Estado de grupos colapsados en sidebar ──────────────────
+const GRUPOS_ABIERTOS = {};
+
+// ── Paleta de colores por empresa ──────────────────────────
+// getColor usa la constante de empresa configurada arriba
+function getColor(empresa){
+  return { color: EMPRESA_COLOR, colorBg: EMPRESA_COLOR_L };
+}
+
+// ============================================================
+// SUCURSALES — una fila por sucursal de la empresa
+// Para agregar sucursales: copiar un bloque y cambiar id/sucursal/datos
+// ============================================================
+const EMPRESAS = [];
+
+
+// Almacén de descripciones de pendientes (editable por usuario)
+const PENDIENTES_STORE = {};
+
+// ============================================================
+// DATOS DE VALORIZACIÓN
+// % global mensual + meta POR MES (puede cambiar mes a mes o mantenerse igual)
+// meta: { Enero:15, Febrero:15, ... } — si todos iguales se puede usar setMetaMes()
+// ============================================================
+const VAL_DATA = {};
+
+// Store para metas editadas en vivo (empId → {mes → valor})
+const METAS_VAL_STORE = {};
+function getMetaMes(empId, mes){
+  const manual = METAS_VAL_STORE[empId]?.[mes];
+  if(manual!=null) return manual;
+  // Si no hay meta exacta para este mes, usar la última meta cargada hasta este mes
+  // (las metas suelen mantenerse constantes; puede que aún no se haya llenado el
+  // mes más reciente en el Sheet).
+  const vd = VAL_DATA[empId];
+  if(!vd) return null;
+  const idxHasta = MESES.indexOf(mes);
+  const ms = MESES.slice(0, idxHasta+1).filter(m=>vd.meta?.[m]!=null);
+  const u = ms[ms.length-1];
+  return u!==undefined ? vd.meta[u] : null;
+}
+function setMetaMes(empId, mes, val){
+  if(!METAS_VAL_STORE[empId]) METAS_VAL_STORE[empId]={};
+  METAS_VAL_STORE[empId][mes] = val;
+  renderMain();
+}
+
+// ============================================================
+// STATE
+// ============================================================
+let mesActual = null;   // ← se define automáticamente al cargar los datos
+let empActual = null;   // ← se define automáticamente al cargar los datos
+let vistaActual = "mensual";
+let filtroActual = "todos";
+
+// ============================================================
+// HELPERS
+// ============================================================
+const colorPct = p => p>=80?"#039855":p>=50?"#F79009":"#F04438";
+
+// Horizonte de las métricas de trazabilidad y documentos: el último mes que
+// tiene residuos cargados. Se fija en cargarDatos() y se cachea porque esFuturo()
+// se llama dentro de bucles de render.
+// OJO: no se usa el último de MESES_ACTIVOS, porque ese arreglo también incluye
+// meses que solo existen en Seguimiento_CSE o Valorización — meses sin ninguna
+// operación que evaluar. Seguimiento CSE no usa esFuturo(): muestra el valor que
+// tenga, exista o no trazabilidad ese mes.
+let ULTIMO_MES_DATOS = null;
+
+function esFuturo(mes){
+  const ref = ULTIMO_MES_DATOS || MESES_ACTIVOS[MESES_ACTIVOS.length - 1];
+  if(!ref) return true; // aún no hay datos de ningún mes
+  return MESES.indexOf(mes) > MESES.indexOf(ref);
+}
+
+// Nuevo formato: imp = número (total importaciones), docs[key] = número cargadas o null
+// Formato viejo (compat): docs["Importado"]=true, docs[key]=true/false
+function esNuevoFormato(r){ return typeof r.imp === "number"; }
+
+// Residuos que aplican ese mes — nuevo: imp>0; viejo: Importado===true
+// Respeta RESIDUOS_ACTIVOS si está definido para ese emp/mes
+function resImportados(emp, mes){
+  const d = emp.mensual[mes];
+  if(!d) return [];
+  let all = d.residuos.filter(r => esNuevoFormato(r) ? r.imp>0 : r.docs["Importado"]===true);
+  const activos = RESIDUOS_ACTIVOS[emp.id]?.[mes];
+  if(activos && activos.size>0) all = all.filter(r=>activos.has(r.nombre));
+  return all;
+}
+
+// Convierte valor de doc a fracción [cargados, esperados] según formato
+function docFrac(v, impTotal){
+  if(v===null||v===undefined) return null; // no aplica
+  // Nuevo: n cargados de impTotal esperados. Se acota a impTotal para que un
+  // dedazo en la planilla (9 documentos para 3 retiros) no empuje el
+  // porcentaje por encima de 100 ni desborde el arco del donut.
+  if(typeof v === "number") return [Math.min(v, impTotal), impTotal];
+  if(v===true)  return [1,1]; // viejo: completo
+  if(v===false) return [0,1]; // viejo: falta
+  return null;
+}
+
+// ── NÚCLEO DE CÁLCULO ───────────────────────────────────────
+// Único bucle de agregación del visor. Recorre los residuos importados por
+// `emps` durante `meses` y acumula [cargados, esperados] de los documentos
+// `docs`. Todas las métricas de abajo son envoltorios de una línea sobre esta
+// función: la fórmula vive en un solo lugar.
+function acumDocs_(emps, meses, docs){
+  let ok=0, tot=0;
+  emps.forEach(emp=>{
+    meses.forEach(mes=>{
+      resImportados(emp, mes).forEach(r=>{
+        const imp = esNuevoFormato(r) ? r.imp : 1;
+        docs.forEach(doc=>{
+          const f = docFrac(r.docs[doc], imp);
+          if(!f) return;           // documento que no aplica: no suma ni resta
+          tot += f[1]; ok += f[0];
+        });
+      });
+    });
+  });
+  return tot===0 ? null : Math.round(ok/tot*100);
+}
+
+// Meses de MESES_ACTIVOS desde Enero hasta `hastaMes` inclusive.
+function mesesHasta_(hastaMes){
+  const idx = MESES.indexOf(hastaMes);
+  return MESES_ACTIVOS.filter(m => MESES.indexOf(m) <= idx);
+}
+
+// ── MÉTRICAS ────────────────────────────────────────────────
+// TRAZABILIDAD = guía de despacho + certificado de disposición final.
+// Define el cumplimiento del objetivo "100% Trazabilidad".
+//
+// El hecho de haber importado NO suma. Antes se hacía `ok+=imp; tot+=imp`, es
+// decir se agregaba un término que vale 100% por construcción: un residuo sin
+// un solo documento cargado puntuaba 33% en vez de 0%, y con la mitad de las
+// guías daba 67% en vez de 50%. El indicador tenía piso 33 en lugar de 0.
+function pctTrazabilidadMes(emp, mes){
+  if(esFuturo(mes)) return null;
+  if(resImportados(emp, mes).length===0) return null;
+  return acumDocs_([emp], [mes], DOCS_TRAZO_COLS);
+}
+
+// Acumulado Enero → hastaMes de una sucursal.
+function pctTrazabilidadAnual(emp, hastaMes){
+  return acumDocs_([emp], mesesHasta_(hastaMes || mesActual), DOCS_TRAZO_COLS);
+}
+
+// Acumulado Enero → hastaMes de TODAS las sucursales de la empresa.
+function pctTrazabilidadEmpresaTotal_(hastaMes){
+  return acumDocs_(EMPRESAS, mesesHasta_(hastaMes), DOCS_TRAZO_COLS);
+}
+
+// DOCUMENTOS = cert. tratamiento + factura + declaración SINADER.
+function pctDocumentosMes(emp, mes){
+  if(esFuturo(mes)) return null;
+  if(resImportados(emp, mes).length===0) return null;
+  return acumDocs_([emp], [mes], DOCS_DOC_COLS);
+}
+
+// CSE: correos y reuniones de seguimiento. No filtra por esFuturo() — el
+// seguimiento puede registrarse en meses sin operaciones. Cuenta solo los
+// meses con un SI/NO explícito; los vacíos no penalizan.
+function pctCSE(emp){
+  let ok=0, tot=0;
+  MESES.forEach(m=>{
+    ["correo","reunion"].forEach(k=>{
+      const v = emp.cse?.[k]?.[m];
+      if(v===null||v===undefined) return;
+      tot++; if(v===true) ok++;
+    });
+  });
+  return tot===0?0:Math.round(ok/tot*100);
+}
+
+// bdg: renderiza badge de documento
+// v = valor del doc (number, true, false, null)
+// imp = total de importaciones del residuo
+function bdg(v, imp){
+  if(v===null||v===undefined) return `<span class="badge b-na">— No aplica</span>`;
+  // Nuevo formato numérico
+  if(typeof v === "number"){
+    if(imp===undefined||imp===null) imp=1;
+    if(v===0) return `<span class="badge b-falta">✗ Falta</span>`;
+    if(v>=imp) return `<span class="badge b-ok">✓ Completo</span>`;
+    return `<span class="badge" style="background:#FEF0C7;color:#92400E;font-weight:700;">${v}/${imp}</span>`;
+  }
+  // Formato viejo booleano
+  if(v===true)  return `<span class="badge b-ok">✓ Cargado</span>`;
+  if(v===false) return `<span class="badge b-falta">✗ Falta</span>`;
+  return `<span class="badge b-na">—</span>`;
+}
+
+function cellA(v, mes){
+  if(esFuturo(mes)) return `<span class="cell-fut">·</span>`;
+  if(v===true)  return `<span class="cell-ok">✓</span>`;
+  if(v===false) return `<span class="cell-no">✗</span>`;
+  return `<span class="cell-na2">—</span>`; // null = no aplica
+}
+
+// El CSE se pinta según el valor registrado, no según esFuturo(): el
+// seguimiento puede existir en meses posteriores al último con operaciones.
+function dotCSE(v){
+  if(v===true)  return `<div class="cse-dot dot-ok">✓</div>`;
+  if(v===false) return `<div class="cse-dot dot-no">✗</div>`;
+  return `<div class="cse-dot dot-fut">·</div>`;
+}
+
+// ============================================================
+// PANEL FILTRO RESIDUOS — muestra todos los residuos del mes
+// y permite activar/desactivar cuáles se muestran en la tabla
+// ============================================================
+function renderFiltroResiduos(emp, mes){
+  const d = emp.mensual[mes];
+  if(!d || d.residuos.length===0) return '';
+  const todos = d.residuos.filter(r => esNuevoFormato(r) ? r.imp>0 : r.docs["Importado"]===true);
+  if(todos.length===0) return '';
+  const activos = RESIDUOS_ACTIVOS[emp.id]?.[mes];
+  const isActivo = (nombre) => !activos || activos.size===0 || activos.has(nombre);
+  return `
+    <div style="padding:8px 16px;background:var(--g50);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <span style="font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.4px;flex-shrink:0;">Residuos activos:</span>
+      ${todos.map(r=>{
+        const cod = r.codigo || COD[r.nombre] || "";
+        const on = isActivo(r.nombre);
+        return `<button onclick="toggleResiduo('${emp.id}','${mes}','${r.nombre.replace(/'/g,"\\'")}',${JSON.stringify(todos.map(x=>x.nombre))})"
+          style="padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;border:1.5px solid ${on?'var(--brand)':'var(--g300)'};background:${on?'var(--brand)':'transparent'};color:${on?'#fff':'var(--g400)'};">
+          ${r.nombre}${cod?` <span style="opacity:.7">${cod}</span>`:''}
+        </button>`;
+      }).join("")}
+      ${activos&&activos.size>0?`<button onclick="resetResiduos('${emp.id}','${mes}')" style="padding:3px 9px;border-radius:999px;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;border:1.5px solid var(--g200);background:transparent;color:var(--g500);">Ver todos</button>`:''}
+    </div>`;
+}
+
+function toggleResiduo(empId, mes, nombre, todos){
+  if(!RESIDUOS_ACTIVOS[empId]) RESIDUOS_ACTIVOS[empId]={};
+  if(!RESIDUOS_ACTIVOS[empId][mes]) RESIDUOS_ACTIVOS[empId][mes]=new Set(todos);
+  const s = RESIDUOS_ACTIVOS[empId][mes];
+  if(s.has(nombre)) s.delete(nombre);
+  else s.add(nombre);
+  if(s.size===todos.length) delete RESIDUOS_ACTIVOS[empId][mes]; // todos activos = sin filtro
+  renderMain();
+}
+
+function resetResiduos(empId, mes){
+  if(RESIDUOS_ACTIVOS[empId]) delete RESIDUOS_ACTIVOS[empId][mes];
+  renderMain();
+}
+
+// ============================================================
+// DONUT CHART — SVG simple de 2 colores
+// ============================================================
+function donutSVG(pct, color, size=38){
+  if(pct===null) pct=0;
+  const r=14, cx=19, cy=19;
+  const circ = 2*Math.PI*r;
+  const dash = (pct/100)*circ;
+  const gap  = circ - dash;
+  // track color: fondo gris claro
+  return `<svg width="${size}" height="${size}" viewBox="0 0 38 38" style="transform:rotate(-90deg);flex-shrink:0;">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--g200)" stroke-width="5"/>
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="5"
+      stroke-dasharray="${dash.toFixed(2)} ${gap.toFixed(2)}"
+      stroke-linecap="round"/>
+  </svg>`;
+}
+
+// ============================================================
+// SIDEBAR — agrupada por empresa, sucursales colapsables
+// ============================================================
+function renderSidebar(){
+  const color   = EMPRESA_COLOR;
+  const colorBg = EMPRESA_COLOR_L;
+  const topEl   = document.getElementById("topEmpresa");
+  if(topEl) topEl.textContent = EMPRESA_NOMBRE + " · Trazabilidad";
+
+  const pcts = EMPRESAS.map(e=>pctTrazabilidadMes(e,mesActual)).filter(p=>p!==null);
+  const prom = pcts.length?Math.round(pcts.reduce((a,b)=>a+b)/pcts.length):null;
+  const col  = colorPct(prom??0);
+  const mi   = MESES.indexOf(mesActual);
+
+  let html = `
+    <div style="padding:12px 14px;border-bottom:1px solid var(--bd);background:var(--g50);">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div style="width:26px;height:26px;border-radius:7px;background:${color};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;">${EMPRESA_NOMBRE.slice(0,2).toUpperCase()}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:12px;font-weight:700;color:var(--g900);">${EMPRESA_NOMBRE}</div>
+          <div style="font-size:10px;color:var(--g400);">${EMPRESAS.length} sucursales · ${mesActual}</div>
+        </div>
+        <div style="font-size:13px;font-weight:800;color:${col};flex-shrink:0;">${prom===null?"—":prom+"%"}</div>
+      </div>
+      <div style="height:4px;background:var(--g200);border-radius:999px;overflow:hidden;">
+        <div style="height:100%;width:${prom??0}%;background:${col};border-radius:999px;transition:width .4s;"></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr auto auto;gap:0;padding:6px 14px 4px;border-bottom:1px solid var(--bd);background:var(--g50);">
+      <span style="font-size:9px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;">Sucursal</span>
+      <span style="font-size:9px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.5px;text-align:center;min-width:40px;">Traz.</span>
+      <span style="font-size:9px;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.5px;text-align:center;min-width:44px;">Val.</span>
+    </div>`;
+
+  html += EMPRESAS.map(emp=>{
+    const act     = emp.id === empActual;
+    const res     = resImportados(emp, mesActual);
+    const tieneOp = res.length > 0;
+    const trazo   = pctTrazabilidadMes(emp, mesActual);
+    // Solo se considera "completo" (verde) si la trazabilidad es 100%.
+    // Cualquier valor menor con datos cargados = rojo (no un degradado por rango).
+    const tCol    = tieneOp ? ((trazo??0)>=100 ? 'var(--ok)' : 'var(--err)') : 'var(--err)';
+
+    // Valorización acumulada: SOLO dato real del Sheet, sin promedio de respaldo
+    const vd      = VAL_DATA[emp.id];
+    const acumOrdenados = MESES.filter(m=>vd?.acumulado?.[m]!=null);
+    const ultimoAcum = acumOrdenados.filter(m=>MESES.indexOf(m)<=mi).slice(-1)[0];
+    const pValAc  = ultimoAcum!==undefined ? vd.acumulado[ultimoAcum] : null;
+    const metaV   = getMetaMes(emp.id, mesActual);
+    const vCol    = pValAc===null?'var(--g300)':metaV?pValAc>=metaV?'var(--ok)':pValAc>=metaV*.7?'var(--warn)':'var(--err)':colorPct(pValAc);
+
+    return `<div class="sb-suc ${act?'active':''}" onclick="setEmp('${emp.id}')" style="display:grid;grid-template-columns:1fr auto auto;gap:4px;align-items:center;padding:7px 14px;">
+      <div class="sb-suc-name" style="font-size:11px;font-weight:${act?700:500};color:${act?color:'var(--g700)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${emp.sucursal}</div>
+      <div style="text-align:center;min-width:40px;">
+        ${esFuturo(mesActual)
+          ? '<span style="color:var(--g300);font-size:10px;">·</span>'
+          : tieneOp
+            ? '<span style="font-size:12px;font-weight:700;color:'+tCol+';">✓</span>'
+            : '<span style="font-size:12px;font-weight:700;color:var(--err);">✗</span>'}
+      </div>
+      <div style="text-align:center;min-width:44px;">
+        ${pValAc===null
+          ? '<span style="font-size:10px;color:var(--g300);">—</span>'
+          : '<span style="font-size:11px;font-weight:700;color:'+vCol+';">'+pValAc+'%</span>'}
+      </div>
+    </div>`;
+  }).join("");
+
+  document.getElementById("sidebar").innerHTML = html;
+}
+
+function toggleGrupo(nombre){
+  const key = nombre;
+  GRUPOS_ABIERTOS[key] = GRUPOS_ABIERTOS[key] === false ? true : false;
+  renderSidebar();
+}
+
+// ============================================================
+// KPI ROW — 6 cards
+// ============================================================
+function renderKPIs(emp){
+  const mi        = MESES.indexOf(mesActual);
+  const pMes      = pctDocumentosMes(emp, mesActual); // solo cert+fac+decl
+  const pTrazoMes = pctTrazabilidadMes(emp, mesActual);  // ← solo imp+transp+disp
+  const pTrazoAnu = pctTrazabilidadAnual(emp);            // ← solo imp+transp+disp
+  const res       = resImportados(emp, mesActual);
+  const mesesEval = MESES_ACTIVOS.filter(m=>!esFuturo(m));
+  const ultimoMes = mesesEval[mesesEval.length-1] || mesActual;
+
+  function kpiCard(lbl, val, desc, pct, highlight, subtag){
+    const col = colorPct(pct??0);
+    const donut = pct!==null ? donutSVG(pct, col) : `<svg width="38" height="38" viewBox="0 0 38 38" style="flex-shrink:0;"><circle cx="19" cy="19" r="14" fill="none" stroke="var(--g200)" stroke-width="5"/></svg>`;
+    return `<div class="kpi${highlight?' highlight':''}">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:4px;">
+        <div class="kpi-lbl" style="margin-bottom:0">${lbl}</div>
+        ${subtag?`<span style="font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:${highlight?'var(--p700)':'var(--g200)'};color:${highlight?'#fff':'var(--g500)'};flex-shrink:0;">${subtag}</span>`:''}
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+        <div>
+          <div class="kpi-val" style="color:${col}">${val}</div>
+          <div class="kpi-desc">${desc}</div>
+        </div>
+        ${donut}
+      </div>
+    </div>`;
+  }
+
+  // KPI residuos: nombres + conteo, sin donut
+  const resNombres = res.map(r=>{
+    const cod = r.codigo || COD[r.nombre] || "";
+    return `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--g100);border-radius:5px;padding:1px 6px;font-size:10px;font-weight:600;color:var(--g700);margin:1px 2px 1px 0;white-space:nowrap;">${r.nombre}</span>`;
+  }).join("");
+  const resCard = `<div class="kpi">
+    <div class="kpi-lbl" style="margin-bottom:4px;">Residuos gestionados · Mensual</div>
+    <div style="display:flex;align-items:flex-start;gap:6px;">
+      <div style="flex:1;min-width:0;">
+        <div class="kpi-val" style="color:${res.length>0?"#039855":"var(--g400)"}">${res.length}</div>
+        <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:0;">${res.length>0?resNombres:`<span style="font-size:10px;color:var(--g400)">Sin importaciones en ${mesActual}</span>`}</div>
+      </div>
+    </div>
+  </div>`;
+
+  // Valorización del mes actual y % Acumulado real (SOLO dato del Sheet, sin promedio de respaldo)
+  const vd       = VAL_DATA[emp.id];
+  const pValMes  = esFuturo(mesActual)?null:(vd?.meses[mesActual]??null);
+  const metaValM = getMetaMes(emp.id, mesActual);
+  const pasadosV = MESES.filter(m=>!esFuturo(m)&&vd?.meses[m]!=null);
+  const acumDisponibles = MESES.filter(m=>vd?.acumulado?.[m]!=null && MESES.indexOf(m)<=MESES.indexOf(mesActual));
+  const ultimoAcumKpi = acumDisponibles.slice(-1)[0];
+  const pValAnu  = ultimoAcumKpi!==undefined ? vd.acumulado[ultimoAcumKpi] : null; // sin fallback: si no hay dato real, queda en null
+  const metaValA = pasadosV.length?pasadosV.map(m=>getMetaMes(emp.id,m)).filter(v=>v!=null).reduce((a,b,_,arr)=>a+b/arr.length,0)||null:null;
+
+  function cValPct(p,m){ if(p===null)return"var(--g300)"; if(m===null)return colorPct(p); return p>=m?"#039855":p>=(m*.7)?"#F79009":"#F04438"; }
+
+  return `<div class="kpi-row" style="grid-template-columns:repeat(5,1fr);">
+    ${kpiCard(`Trazabilidad`, pTrazoMes===null?"—":pTrazoMes+"%", `${mesActual} · imp+transp+dest`, pTrazoMes, false, "MENSUAL")}
+    ${kpiCard(`Trazabilidad`, pTrazoAnu===null?"—":pTrazoAnu+"%", `Ene–${mesActual.slice(0,3)} · acumulado`, pTrazoAnu, false, "ANUAL")}
+    ${kpiCard(`Documentos cargados`, pMes===null?"—":pMes+"%", `${mesActual} · cert+fac+decl`, pMes, false, "MENSUAL")}
+    ${(()=>{
+      const col=cValPct(pValMes,metaValM);
+      return kpiCard(`Valorización`, pValMes===null?"—":pValMes+"%", `${mesActual}${metaValM!=null?" · meta "+metaValM+"%":""}`, pValMes===null?null:metaValM?Math.min(Math.round(pValMes/metaValM*100),100):pValMes, false, "MENSUAL");
+    })()}
+    ${(()=>{
+      const col=cValPct(pValAnu,metaValA);
+      const donut = pValAnu!==null ? donutSVG(Math.min(Math.round(pValAnu/(metaValA||100)*100),100), col) : `<svg width="38" height="38" viewBox="0 0 38 38" style="flex-shrink:0;"><circle cx="19" cy="19" r="14" fill="none" stroke="var(--g200)" stroke-width="5"/></svg>`;
+      const rangoTxt = ultimoAcumKpi===undefined ? "Sin dato real aún"
+                       : ultimoAcumKpi==="Enero" ? "Enero"
+                       : `Enero a ${ultimoAcumKpi} · ${MESES.indexOf(ultimoAcumKpi)+1} meses`;
+      return `<div class="kpi">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:4px;margin-bottom:4px;">
+          <div class="kpi-lbl" style="margin-bottom:0">Valorización</div>
+          <span style="font-size:8px;font-weight:700;padding:1px 5px;border-radius:4px;background:var(--g200);color:var(--g500);flex-shrink:0;">ANUAL</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+          <div>
+            <div class="kpi-val" style="color:${col}">${pValAnu===null?"—":pValAnu+"%"}</div>
+            <div class="kpi-desc">${rangoTxt}</div>
+          </div>
+          ${donut}
+        </div>
+      </div>`;
+    })()}
+  </div>`;
+}
+
+// ============================================================
+// VISTA MENSUAL
+// ============================================================
+function renderMensual(emp, filtro){
+  const d = emp.mensual[mesActual];
+  if(esFuturo(mesActual)) return `<div class="empty">Mes futuro — sin datos aún.</div>`;
+  if(!d) return `<div class="empty">Sin datos para ${mesActual}. Actualiza la planilla.</div>`;
+
+  let res = resImportados(emp, mesActual);
+
+  if(res.length===0) return `
+    <div class="card" style="border-color:var(--g300)">
+      <div class="card-header"><div class="card-title">Detalle mensual — ${mesActual} 2026</div></div>
+      <div class="empty" style="padding:32px">Sin residuos importados en ${mesActual}.</div>
+      ${d.pendiente?`<div class="falta-banner">📝 ${d.pendiente}</div>`:''}
+    </div>
+    ${renderCSE(emp)}`;
+
+  // Pendiente = trazabilidad incompleta (transp/disp final) O documentos incompletos
+  // Completa = trazabilidad completa Y documentos completos
+  function docIncompleto(r){
+    const imp = esNuevoFormato(r) ? r.imp : 1;
+    const docsARevisar = [...DOCS_TRAZO_COLS, ...DOCS_DOC_COLS];
+    return docsARevisar.some(doc=>{
+      const v = r.docs[doc];
+      if(v===null||v===undefined) return false;
+      if(typeof v === "number") return v < imp;
+      return v===false;
+    });
+  }
+  function docCompleto(r){ return !docIncompleto(r); }
+  if(filtro==="falta") res = res.filter(r=>docIncompleto(r));
+  if(filtro==="ok")    res = res.filter(r=>docCompleto(r));
+
+  const pMes = pctTrazabilidadMes(emp, mesActual)??0; // % trazabilidad real
+  const noRes = `<tr><td colspan="10" style="text-align:center;color:var(--g400);padding:24px">Sin resultados con ese filtro.</td></tr>`;
+
+  // ── Filas compartidas para ambas tablas (mismo orden de residuos) ──
+  // Helper % por tarjeta para cada residuo
+  function pTrazoRes(r){
+    const imp=esNuevoFormato(r)?r.imp:1; let ok=0,tot=0;
+    ok+=imp; tot+=imp; // importaciones siempre completo si está importado
+    ["Transportista","Disposición final"].forEach(d=>{
+      const f=docFrac(r.docs[d],imp); if(!f)return; tot+=f[1]; ok+=f[0];
+    });
+    return tot===0?null:Math.round(ok/tot*100);
+  }
+  function pDocRes(r){
+    const imp=esNuevoFormato(r)?r.imp:1; let ok=0,tot=0;
+    ["Cert. tratamiento","Factura","Cert. declaración"].forEach(d=>{
+      const f=docFrac(r.docs[d],imp); if(!f)return; tot+=f[1]; ok+=f[0];
+    });
+    return tot===0?null:Math.round(ok/tot*100);
+  }
+  function pCell(p){
+    if(p===null) return `<td style="background:var(--g50);border-left:2px solid var(--g200);text-align:center;"><span style="color:var(--g300);font-size:11px;">—</span></td>`;
+    const col=colorPct(p);
+    return `<td style="background:var(--g50);border-left:2px solid var(--g200);text-align:center;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:3px;">
+        <span style="font-size:15px;font-weight:700;color:${col};">${p}%</span>
+        <div style="width:36px;height:4px;background:var(--g200);border-radius:999px;overflow:hidden;">
+          <div style="height:100%;width:${p}%;background:${col};border-radius:999px;"></div>
+        </div>
+      </div></td>`;
+  }
+
+  const filas = res.length===0 ? noRes : res.map(r=>{
+    const imp = esNuevoFormato(r) ? r.imp : 1;
+    const cod = r.codigo || COD[r.nombre] || "";
+    const rLabel = `<td class="col-residuo">
+      <div style="display:flex;flex-direction:column;gap:2px;">
+        <span class="res-tag">${r.nombre}</span>
+
+      </div></td>`;
+
+    const trazoRow = `<tr>
+      ${rLabel}
+      <td class="col-imp" style="text-align:center;"><span style="font-size:17px;font-weight:700;color:var(--g800);">${imp}</span></td>
+      ${DOCS_TRAZO_COLS.map(doc=>`<td class="col-doc">${bdg(r.docs[doc], imp)}</td>`).join("")}
+      ${pCell(pTrazoRes(r))}
+    </tr>`;
+
+    const docRow = `<tr>
+      ${rLabel}
+      <td class="col-imp" style="text-align:center;"><span style="font-size:17px;font-weight:700;color:var(--g800);">${imp}</span></td>
+      ${DOCS_DOC_COLS.map(doc=>`<td class="col-doc">${bdg(r.docs[doc], imp)}</td>`).join("")}
+      ${pCell(pDocRes(r))}
+    </tr>`;
+
+    return {trazoRow, docRow};
+  });
+
+  const trazoRows = res.length===0 ? noRes : filas.map(f=>f.trazoRow).join("");
+  const docRows   = res.length===0 ? noRes : filas.map(f=>f.docRow).join("");
+
+  return `
+
+
+    <!-- DOS TARJETAS LADO A LADO en pantallas grandes, apiladas en pequeñas -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;">
+
+      <!-- TARJETA 1: TRAZABILIDAD -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title" style="display:flex;align-items:center;gap:7px;">
+              <span style="width:8px;height:8px;border-radius:50%;background:var(--brand);display:inline-block;"></span>
+              Trazabilidad
+            </div>
+            <div class="card-sub">Operaciones · Transportista · Disposición final · <strong>Define el % de trazabilidad</strong></div>
+          </div>
+          <span style="font-size:10px;font-weight:700;padding:2px 9px;border-radius:999px;background:#EBF5FC;color:var(--brand);">${resImportados(emp,mesActual).length} residuos</span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table style="min-width:380px;width:100%;">
+            <thead><tr>
+              <th class="col-residuo" style="min-width:120px;">Residuo</th>
+              <th class="col-imp" style="text-align:center;">Operaciones</th>
+              ${DOCS_TRAZO_COLS.map(d=>`<th class="col-doc">${d}</th>`).join("")}
+              <th class="col-doc" style="background:var(--g100);border-left:2px solid var(--g200);">%</th>
+            </tr></thead>
+            <tbody>${trazoRows}</tbody>
+          </table>
+        </div>
+        <div class="legend">
+          <div class="leg-item"><span style="color:var(--ok);font-weight:700">✓</span> Completo</div>
+          <div class="leg-item"><span style="color:var(--err);font-weight:700">✗</span> Falta</div>
+          <div class="leg-item"><span style="background:#FEF0C7;color:#92400E;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:700;">2/3</span> Parcial</div>
+          <div class="leg-item"><span style="color:var(--na);font-weight:700">—</span> N/A</div>
+        </div>
+      </div>
+
+      <!-- TARJETA 2: DOCUMENTOS -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title" style="display:flex;align-items:center;gap:7px;">
+              <span style="width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block;"></span>
+              Documentos
+            </div>
+            <div class="card-sub">Cert. tratamiento · Factura · Declaración SINADER · Solo verificación</div>
+          </div>
+        </div>
+        <div style="overflow-x:auto;">
+          <table style="min-width:380px;width:100%;">
+            <thead><tr>
+              <th class="col-residuo" style="min-width:120px;">Residuo</th>
+              <th class="col-imp" style="text-align:center;">Operaciones</th>
+              ${DOCS_DOC_COLS.map(d=>`<th class="col-doc">${d==="Cert. declaración"?"Declaración SINADER":d}</th>`).join("")}
+              <th class="col-doc" style="background:var(--g100);border-left:2px solid var(--g200);">%</th>
+            </tr></thead>
+            <tbody>${docRows}</tbody>
+          </table>
+        </div>
+        <div class="legend">
+          <div class="leg-item"><span style="color:var(--ok);font-weight:700">✓</span> Completo</div>
+          <div class="leg-item"><span style="color:var(--err);font-weight:700">✗</span> Falta</div>
+          <div class="leg-item"><span style="background:#FEF0C7;color:#92400E;padding:1px 7px;border-radius:999px;font-size:10px;font-weight:700;">2/3</span> Parcial</div>
+          <div class="leg-item"><span style="color:var(--na);font-weight:700">—</span> N/A</div>
+        </div>
+      </div>
+
+    </div>
+
+  `;
+}
+
+
+// ============================================================
+// BOX DE DESCRIPCIÓN DE PENDIENTE (editable)
+// ============================================================
+function renderPendienteBox(emp){
+  const key = `${emp.id}_${mesActual}`;
+  const d = emp.mensual[mesActual];
+  // Valor inicial: el campo pendiente del data o lo que guardó el usuario
+  const valorInicial = PENDIENTES_STORE[key] !== undefined
+    ? PENDIENTES_STORE[key]
+    : (d?.pendiente || "");
+
+  return `
+    <div class="pend-box" id="pendBox_${key}">
+      <div class="pend-header">
+        <div class="pend-title">📝 Descripción de pendientes — ${mesActual}</div>
+        <span style="font-size:10px;color:var(--g400)">Editable · visible para el cliente</span>
+      </div>
+      <div class="pend-body">
+        <textarea class="pend-textarea" id="pendTA_${key}" placeholder="Describe qué quedó pendiente este mes, acuerdos o próximos pasos...">${valorInicial}</textarea>
+        <button class="pend-btn" onclick="guardarPendiente('${key}')">Guardar descripción</button>
+        <div class="pend-saved" id="pendSaved_${key}">✓ Guardado</div>
+      </div>
+    </div>`;
+}
+
+function guardarPendiente(key){
+  const ta = document.getElementById("pendTA_"+key);
+  const saved = document.getElementById("pendSaved_"+key);
+  if(!ta) return;
+  PENDIENTES_STORE[key] = ta.value;
+  saved.style.display="block";
+  setTimeout(()=>saved.style.display="none",2000);
+}
+
+// ============================================================
+// CSE
+// ============================================================
+// modo: "mes" = solo mes actual | "anual" = todos los meses
+function renderCSE(emp, modo){
+  modo = modo || "mes";
+  // Sin encuesta de seguimiento
+  const keys = [{key:"correo",lbl:"Correo de seguimiento"},{key:"reunion",lbl:"Reunión de seguimiento"}];
+  const meses = MESES; // todos los meses Ene-Dic, futuros como ·
+
+  // % solo sobre correo y reunión — misma fórmula que pctCSE()
+  const pCse = pctCSE(emp);
+
+  // Un mes se ve gris si no tiene ningún registro de CSE (ni SI ni NO)
+  const sinRegistro = m => keys.every(({key}) => emp.cse?.[key]?.[m] === undefined
+                                              || emp.cse?.[key]?.[m] === null);
+
+  // Tabla compacta: una fila de meses como encabezado, una fila por acción
+  const thMeses = meses.map(m=>
+    `<th style="text-align:center;padding:4px 6px;font-size:9px;font-weight:700;color:${sinRegistro(m)?'var(--g300)':m===mesActual?'var(--brand)':'var(--g400)'};white-space:nowrap;min-width:28px;">${m.slice(0,3)}</th>`
+  ).join("");
+
+  return `
+    <div class="cse-section">
+      <div class="cse-header">
+        <div>
+          <div class="cse-title">Seguimiento CSE</div>
+          <div style="font-size:10px;color:var(--g600);margin-top:1px">Correos · Reuniones</div>
+        </div>
+        <div style="text-align:right">
+          <div class="cse-pct-big" style="color:${colorPct(pCse)}">${pCse}%</div>
+          <div style="font-size:10px;color:var(--g500)">completitud CSE</div>
+        </div>
+      </div>
+      <div style="overflow-x:auto;padding:0 0 2px;">
+        <table style="width:100%;border-collapse:collapse;min-width:${meses.length*32+160}px;">
+          <thead>
+            <tr style="background:var(--g50);">
+              <th style="text-align:left;padding:6px 16px;font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;min-width:160px;">Mes</th>
+              ${thMeses}
+            </tr>
+          </thead>
+          <tbody>
+            ${keys.map(({key,lbl},i)=>`
+              <tr style="${i%2===0?'':'background:var(--g25)'}">
+                <td style="padding:8px 16px;font-size:11px;font-weight:700;color:var(--g700);white-space:nowrap;">${lbl}</td>
+                ${meses.map(m=>`<td style="text-align:center;padding:6px 4px;">${dotCSE(emp.cse?.[key]?.[m])}</td>`).join("")}
+              </tr>`).join("")}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// VISTA ANUAL
+// ============================================================
+function renderAnual(emp){
+  const meses = MESES;
+  // Antes había aquí un esFuturoAnual() local, relativo al mes seleccionado,
+  // que contradecía al esFuturo() global: el mismo mes salía "·" en esta tabla
+  // y con datos reales en la de CSE. Una sola definición para todo el visor.
+  const esFuturoAnual = esFuturo;
+  const pTrazo = pctTrazabilidadAnual(emp)??0;
+  const pDocs  = (()=>{
+    const ms=meses.filter(m=>!esFuturoAnual(m));
+    let ok=0,tot=0;
+    ms.forEach(m=>{
+      resImportados(emp,m).forEach(r=>{
+        const imp=esNuevoFormato(r)?r.imp:1;
+        ["Cert. tratamiento","Factura","Cert. declaración"].forEach(d=>{
+          const f=docFrac(r.docs[d],imp); if(!f)return; tot+=f[1]; ok+=f[0];
+        });
+      });
+    });
+    return tot===0?0:Math.round(ok/tot*100);
+  })();
+
+  // Helper: por mes y residuo, ✓ si transportista Y disposición final cargados
+  function trazoMes(m){
+    if(esFuturoAnual(m)) return `<td class="cell-fut">·</td>`;
+    const res=resImportados(emp,m);
+    if(!res.length) return `<td style="text-align:center"><span style="font-size:13px;font-weight:700;color:#F04438">0%</span></td>`;
+    const p=pctTrazabilidadMes(emp,m);
+    const col=colorPct(p??0);
+    return `<td style="text-align:center">
+      <span style="font-size:13px;font-weight:700;color:${col}">${p===null?"—":p+"%"}</span>
+    </td>`;
+  }
+  function docsAnuoMes(docKey, m){
+    if(esFuturoAnual(m)) return `<td class="cell-fut">·</td>`;
+    const res = resImportados(emp, m);
+    // Sin residuos importados en un mes que ya pasó/es el actual = falta cargar,
+    // igual que la fila "Operaciones" (no es un "no aplica" neutro).
+    if(!res.length) return `<td style="text-align:center"><span class="cell-no">✗</span></td>`;
+    let ok=0,tot=0;
+    res.forEach(r=>{
+      const imp=esNuevoFormato(r)?r.imp:1;
+      const f=docFrac(r.docs[docKey],imp); if(!f)return; tot+=f[1]; ok+=f[0];
+    });
+    if(tot===0) return `<td style="color:var(--g300);font-size:11px">—</td>`;
+    // ✓ solo si todos completos, ✗ si falta alguno
+    if(ok>=tot) return `<td style="text-align:center"><span class="cell-ok">✓</span></td>`;
+    return `<td style="text-align:center"><span class="cell-no">✗</span></td>`;
+  }
+
+  const thMes = meses.map(m=>`<th style="${esFuturoAnual(m)?'color:var(--g300)':m===mesActual?'color:var(--brand);font-weight:800':''}">${m}</th>`).join("");
+
+  return `
+    <!-- TARJETA 1: TRAZABILIDAD ANUAL -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header">
+        <div>
+          <div class="card-title" style="display:flex;align-items:center;gap:7px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--brand);display:inline-block;"></span>
+            Trazabilidad · Vista anual
+          </div>
+          <div class="card-sub">Operaciones · Transportista · Disposición final por mes</div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-bg" style="width:120px"><div class="prog-fill" style="width:${pTrazo}%;background:${colorPct(pTrazo)}"></div></div>
+          <span class="prog-lbl" style="color:${colorPct(pTrazo)}">${pTrazo}%</span>
+        </div>
+      </div>
+      <div class="ann-wrap">
+        <table class="ann-table">
+          <thead><tr>
+            <th>Mes</th>${thMes}
+          </tr></thead>
+          <tbody>
+            <tr class="ann-sep"><td colspan="${meses.length+1}">Residuos importados por mes</td></tr>
+            <tr>
+              <td style="font-size:11px;font-weight:600;color:var(--g700)">Operaciones</td>
+              ${meses.map(m=>{
+                if(esFuturoAnual(m)) return `<td class="cell-fut">·</td>`;
+                const res=resImportados(emp,m);
+                return res.length>0
+                  ? `<td style="text-align:center"><span class="cell-ok">✓</span></td>`
+                  : `<td style="text-align:center"><span class="cell-no">✗</span></td>`;
+              }).join("")}
+            </tr>
+            <tr>
+              <td style="font-size:11px;font-weight:600;color:var(--g700)">Transportista</td>
+              ${meses.map(m=>docsAnuoMes("Transportista",m)).join("")}
+            </tr>
+            <tr>
+              <td style="font-size:11px;font-weight:600;color:var(--g700)">Disposición final</td>
+              ${meses.map(m=>docsAnuoMes("Disposición final",m)).join("")}
+            </tr>
+            <tr>
+              <td style="font-size:11px;font-weight:700;color:var(--brand)">% Trazabilidad</td>
+              ${meses.map(m=>trazoMes(m)).join("")}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend">
+        <div class="leg-item"><span class="cell-ok">✓</span> Completo</div>
+        <div class="leg-item"><span class="cell-no">✗</span> Falta</div>
+        <div class="leg-item"><span class="cell-na2">—</span> Sin importaciones</div>
+        <div class="leg-item"><span class="cell-fut">·</span> Mes futuro</div>
+      </div>
+    </div>
+
+    <!-- TARJETA 2: DOCUMENTOS ANUAL -->
+    <div class="card" style="margin-bottom:14px;">
+      <div class="card-header">
+        <div>
+          <div class="card-title" style="display:flex;align-items:center;gap:7px;">
+            <span style="width:8px;height:8px;border-radius:50%;background:var(--ok);display:inline-block;"></span>
+            Documentos · Vista anual
+          </div>
+          <div class="card-sub">Cert. tratamiento · Factura · Declaración SINADER por mes · Solo verificación</div>
+        </div>
+        <div class="prog-wrap">
+          <div class="prog-bg" style="width:120px"><div class="prog-fill" style="width:${pDocs}%;background:${colorPct(pDocs)}"></div></div>
+          <span class="prog-lbl" style="color:${colorPct(pDocs)}">${pDocs}%</span>
+        </div>
+      </div>
+      <div class="ann-wrap">
+        <table class="ann-table">
+          <thead><tr>
+            <th>Documento</th>${thMes}
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td style="font-size:11px;font-weight:600;color:var(--g700)">Cert. tratamiento</td>
+              ${meses.map(m=>docsAnuoMes("Cert. tratamiento",m)).join("")}
+            </tr>
+            <tr>
+              <td style="font-size:11px;font-weight:600;color:var(--g700)">Factura</td>
+              ${meses.map(m=>docsAnuoMes("Factura",m)).join("")}
+            </tr>
+            <tr>
+              <td style="font-size:11px;font-weight:600;color:var(--g700)">Declaración SINADER</td>
+              ${meses.map(m=>docsAnuoMes("Cert. declaración",m)).join("")}
+            </tr>
+            <tr style="background:var(--g50);">
+              <td style="font-size:11px;font-weight:700;color:var(--ok)">% Cargado</td>
+              ${meses.map(m=>{
+                if(esFuturoAnual(m)) return `<td class="cell-fut">·</td>`;
+                const p = pctDocumentosMes(emp, m);
+                if(p===null) return `<td style="color:var(--g300);font-size:11px">—</td>`;
+                const col = colorPct(p);
+                return `<td style="text-align:center"><span style="font-size:13px;font-weight:700;color:${col}">${p}%</span></td>`;
+              }).join("")}
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="legend">
+        <div class="leg-item"><span class="cell-ok">✓</span> Completo</div>
+        <div class="leg-item"><span class="cell-no">✗</span> Falta</div>
+        <div class="leg-item"><span class="cell-na2">—</span> Sin importaciones</div>
+        <div class="leg-item"><span class="cell-fut">·</span> Mes futuro</div>
+      </div>
+    </div>
+
+    ${renderCSE(emp,"anual")}
+  `;
+}
+
+// ============================================================
+// VISTA OBJETIVOS
+// ============================================================
+// % Trazabilidad de TODA la empresa (suma de todas las sucursales), hasta un mes dado
+// ¿Objetivo cumplido? Los objetivos de trazabilidad llegan sin `ok` desde el
+// Apps Script porque su avance se calcula acá desde los datos; el resto sí lo trae.
+function objetivoCumplido_(o, hastaMes){
+  if(/trazabilidad/i.test(o.texto)){
+    const av = pctTrazabilidadEmpresaTotal_(hastaMes);
+    return av !== null && av >= 100;
+  }
+  return o.ok === true;
+}
+
+function renderObjetivos(emp){
+  if(emp.objetivos.length===0) return `<div class="empty">Sin objetivos registrados para esta empresa.</div>`;
+
+  // Rango evaluado: SIEMPRE Enero hasta el mes seleccionado en el visor
+  const mesesConDatos = MESES_ACTIVOS.filter(m=>MESES.indexOf(m) <= MESES.indexOf(mesActual));
+
+  // Valorización: % de TODAS las sucursales de la empresa que cumplen o superan
+  // su propia meta, con el acumulado real hasta el mes seleccionado. Es un
+  // indicador global de la empresa, no de la sucursal que estés viendo.
+  function acumuladoHasta_(vd, hastaMes){
+    if(!vd) return null;
+    const ms = MESES.slice(0, MESES.indexOf(hastaMes)+1).filter(m=>vd.acumulado?.[m]!=null);
+    const u = ms[ms.length-1];
+    return u!==undefined ? vd.acumulado[u] : null;
+  }
+  let cumplen=0, evaluables=0;
+  EMPRESAS.forEach(e=>{
+    const vd = VAL_DATA[e.id];
+    const meta = getMetaMes(e.id, mesActual);
+    if(meta==null) return;
+    const ac = acumuladoHasta_(vd, mesActual);
+    if(ac===null) return;
+    evaluables++;
+    if(ac>=meta) cumplen++;
+  });
+  const pctCumplimiento = evaluables>0 ? Math.round(cumplen/evaluables*100) : null;
+  const colCump = pctCumplimiento===null?'var(--g300)':pctCumplimiento>=100?'#039855':pctCumplimiento>=70?'#F79009':'#F04438';
+
+  return `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Objetivos 2026</div>
+        <div class="card-sub">Enero → ${mesActual} · ${mesesConDatos.length} meses evaluados</div>
+      </div>
+      <div class="obj-grid">
+        ${emp.objetivos.map(o=>{
+          const esTrazabilidad = /trazabilidad/i.test(o.texto);
+          if(!esTrazabilidad) return ""; // la de Valorización se reemplaza por la tarjeta agregada de abajo
+
+          const avance = pctTrazabilidadEmpresaTotal_(mesActual);
+          const metaNum = 100;
+          const pctBarra = Math.min(Math.round(avance / metaNum * 100), 100);
+          const ok = avance >= metaNum;
+          const col = ok ? '#039855' : (avance >= metaNum*0.7 ? '#F79009' : '#F04438');
+
+          return `<div class="obj-item">
+            <div class="obj-text">
+              ${o.texto}
+              <span style="font-size:10px;font-weight:500;color:var(--g400);margin-left:6px;">Ene–${mesActual.slice(0,3)} · toda la empresa</span>
+            </div>
+            <div class="obj-prog">
+              <div class="prog-bg" style="flex:1">
+                <div class="prog-fill" style="width:${pctBarra}%;background:${col}"></div>
+              </div>
+              <span class="prog-lbl" style="color:${col};min-width:42px;text-align:right">${avance===null?"—":avance+"%"}</span>
+              ${ok?`<span class="badge b-ok">✓</span>`:`<span class="badge b-falta">✗</span>`}
+            </div>
+            <div style="font-size:10px;color:var(--g400);margin-top:5px;">Suma de documentos reales de todas las sucursales</div>
+          </div>`;
+        }).join("")}
+
+        <div class="obj-item">
+          <div class="obj-text">
+            Valorización
+            <span style="font-size:10px;font-weight:500;color:var(--g400);margin-left:6px;">Ene–${mesActual.slice(0,3)} · toda la empresa</span>
+          </div>
+          <div class="obj-prog">
+            <div class="prog-bg" style="flex:1">
+              <div class="prog-fill" style="width:${pctCumplimiento??0}%;background:${colCump}"></div>
+            </div>
+            <span class="prog-lbl" style="color:${colCump};min-width:42px;text-align:right">${pctCumplimiento===null?"—":pctCumplimiento+"%"}</span>
+            ${pctCumplimiento===null?"":pctCumplimiento>=100?`<span class="badge b-ok">✓</span>`:`<span class="badge b-falta">✗</span>`}
+          </div>
+          <div style="font-size:10px;color:var(--g400);margin-top:5px;">
+            ${evaluables===0
+              ? "Aún no hay meta Y % Acumulado cargados juntos en ninguna sucursal (revisa la hoja Valorización)"
+              : `${cumplen} de ${evaluables} sucursales cumplen o superan su meta de valorización acumulada`}
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// VISTA VALORIZACIÓN — por sucursal, barras horizontales
+// ============================================================
+function renderValorizacion(emp){
+  const vd    = VAL_DATA[emp.id];
+  const meses = MESES.slice(0, MESES.indexOf(mesActual) + 1); // Enero → mes seleccionado, nada más
+
+  function cV(p,mt){ if(p===null)return"var(--g300)"; if(mt===null)return colorPct(p); return p>=mt?"#039855":p>=(mt*.7)?"#F79009":"#F04438"; }
+  function chip(p,mt){
+    if(p===null)return'<span class="val-chip val-chip-na">Sin dato</span>';
+    if(mt!==null){ if(p>=mt)return'<span class="val-chip val-chip-ok">\u2713 Sobre meta</span>'; if(p>=(mt*.7))return'<span class="val-chip val-chip-warn">\u2197 Cerca</span>'; return'<span class="val-chip val-chip-err">\u2198 Bajo meta</span>'; }
+    return p>=80?'<span class="val-chip val-chip-ok">'+p+'%</span>':p>=40?'<span class="val-chip val-chip-warn">'+p+'%</span>':'<span class="val-chip val-chip-err">'+p+'%</span>';
+  }
+  const mi      = MESES.indexOf(mesActual);
+  const pasados = meses.filter(m=>!esFuturo(m)&&vd?.meses[m]!=null);
+  const vals    = pasados.map(m=>vd.meses[m]);
+  const acumDisp = meses.filter(m=>vd?.acumulado?.[m]!=null && MESES.indexOf(m)<=mi);
+  const ultimoMesAcumDetalle = acumDisp[acumDisp.length-1];
+  const prom    = acumDisp.length ? vd.acumulado[ultimoMesAcumDetalle] : null; // SOLO dato real, sin fallback
+  const pasadosHastaMes = meses.slice(0, mi+1).filter(m=>vd?.meses[m]!=null); // Enero, o Enero+Febrero, etc. según el mes elegido
+  const promedioSimple = pasadosHastaMes.length?Math.round(pasadosHastaMes.map(m=>vd.meses[m]).reduce((a,b)=>a+b)/pasadosHastaMes.length*10)/10:null; // referencia aparte
+  const mejor   = vals.length?Math.max(...vals):null;
+  const mejorM  = mejor!==null?pasados[vals.indexOf(mejor)]:"";
+  const tend    = vals.length>=2?Math.round((vals[vals.length-1]-vals[vals.length-2])*10)/10:null;
+  const pAct    = esFuturo(mesActual)?null:(vd?.meses[mesActual]??null);
+  const mAct    = getMetaMes(emp.id,mesActual);
+  const metasV  = pasados.map(m=>getMetaMes(emp.id,m)).filter(v=>v!=null);
+  const promM   = metasV.length?metasV.reduce((a,b)=>a+b)/metasV.length:null;
+
+  // ── Banner de brecha vs meta ────────────────────────────────────────────
+  // El objetivo de valorización se cumple o no se cumple: con meta 5% y
+  // acumulado 3% la pestaña Objetivos muestra 0%. Acá traducimos eso a avance
+  // parcial: cuántos puntos faltan y qué % de la meta representan.
+  // Se compara acumulado real vs meta DEL MES (mismo criterio que la tarjeta
+  // de Objetivos), no vs promM — ese es el promedio de metas del año.
+  const brechaPts   = (prom!=null && mAct!=null) ? Math.round((mAct-prom)*10)/10 : null;
+  const avanceMeta  = (prom!=null && mAct!=null && mAct>0) ? Math.round(prom/mAct*100) : null;
+  const promTxt     = prom!=null ? Math.round(prom*10)/10 : null;
+  // Si el Sheet aún no tiene el mes elegido, `prom` viene de un mes anterior:
+  // hay que decirlo o el banner afirma una brecha con datos viejos.
+  const acumViejo   = prom!=null && ultimoMesAcumDetalle!==mesActual
+                      ? ` · acumulado a ${ultimoMesAcumDetalle}` : "";
+  let bannerBrecha;
+  if(mAct==null){
+    bannerBrecha = `<div class="val-gap val-gap-na">
+      <div class="val-gap-t">Sin meta cargada</div>
+      <div class="val-gap-d">El Sheet no tiene meta para ${mesActual} ni para ningún mes anterior, así que no se puede evaluar cumplimiento.</div>
+    </div>`;
+  } else if(prom==null){
+    bannerBrecha = `<div class="val-gap val-gap-na">
+      <div class="val-gap-t">Meta ${mAct}% · sin % acumulado aún</div>
+      <div class="val-gap-d">La fila "% Acumulado" del Sheet todavía no tiene datos hasta ${mesActual}.</div>
+    </div>`;
+  } else if(brechaPts<=0){
+    bannerBrecha = `<div class="val-gap val-gap-ok">
+      <div class="val-gap-t">✓ Meta cumplida — ${promTxt}% acumulado sobre meta ${mAct}%</div>
+      <div class="val-gap-d">${brechaPts===0?"Justo en la meta":Math.abs(brechaPts)+" pts sobre la meta"}${acumViejo}</div>
+    </div>`;
+  } else {
+    bannerBrecha = `<div class="val-gap ${avanceMeta>=70?"val-gap-warn":"val-gap-err"}">
+      <div class="val-gap-t">Falta ${100-avanceMeta}% para cumplir la meta</div>
+      <div class="val-gap-d">${promTxt}% acumulado de ${mAct}% · ${avanceMeta}% de avance · faltan ${brechaPts} pts de valorización${acumViejo}</div>
+      <div class="val-gap-n">El objetivo se marca cumplido solo al 100%.</div>
+    </div>`;
+  }
+
+  // % Acumulado real (dato del Sheet) por mes; SOLO si ese mes ya tiene el dato cargado
+  function acum(mi){
+    const mNombre = meses[mi];
+    return vd?.acumulado?.[mNombre]!=null ? vd.acumulado[mNombre] : null;
+  }
+  function bar(v,col){
+    return '<div style="display:flex;align-items:center;gap:8px;">'
+      +'<div style="width:110px;height:8px;background:var(--g100);border-radius:999px;overflow:hidden;flex-shrink:0;">'
+      +'<div style="height:100%;width:'+v+'%;background:'+col+';border-radius:999px;"></div></div>'
+      +'<span style="font-size:14px;font-weight:700;color:'+col+';min-width:40px;">'+v+'%</span></div>';
+  }
+
+  return `
+    <div class="kpi-row" style="grid-template-columns:repeat(5,1fr);margin-bottom:14px;">
+      <div class="kpi">
+        <div class="kpi-lbl">Valorizaci\u00f3n ${mesActual}</div>
+        <div class="kpi-val" style="color:${cV(pAct,mAct)}">${pAct===null?"&#8212;":pAct+"%"}</div>
+        <div class="kpi-desc">${mAct!=null?"Meta: "+mAct+"%":"Sin meta"}</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">Acumulado 2026</div>
+        <div class="kpi-val" style="color:${cV(prom,promM)}">${prom===null?"&#8212;":prom+"%"}</div>
+        <div class="kpi-desc">${prom===null?"Sin dato real a\u00fan":ultimoMesAcumDetalle==="Enero"?"Enero":`Enero a ${ultimoMesAcumDetalle} \u00b7 ${MESES.indexOf(ultimoMesAcumDetalle)+1} meses`}</div>
+      </div>
+      <div class="kpi" style="background:var(--g50);">
+        <div class="kpi-lbl" style="color:var(--g400);">Promedio simple</div>
+        <div class="kpi-val" style="color:var(--g500);font-size:20px;">${promedioSimple===null?"&#8212;":promedioSimple+"%"}</div>
+        <div class="kpi-desc">${mesActual==="Enero"?"Enero":`Enero a ${mesActual} \u00b7 ${pasadosHastaMes.length} meses`}</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">Mejor mes</div>
+        <div class="kpi-val" style="color:#039855">${mejor===null?"&#8212;":mejor+"%"}</div>
+        <div class="kpi-desc">${mejorM||"&#8212;"}</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-lbl">Tendencia</div>
+        <div class="kpi-val" style="color:${tend===null?"var(--g400)":tend>0?"#039855":tend<0?"#F04438":"var(--g400)"}">${tend===null?"&#8212;":tend>0?"\u2191 +"+tend+"%":tend<0?"\u2193 "+tend+"%":"\u2192 igual"}</div>
+        <div class="kpi-desc">\u00faltimo vs anterior</div>
+      </div>
+    </div>
+    ${bannerBrecha}
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Valorizaci\u00f3n mensual y acumulada &middot; ${emp.sucursal}</div>
+          <div class="card-sub">Todos los meses &middot; % mensual + % acumulado de meses cargados</div>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+          <thead><tr style="background:var(--g50);">
+            <th style="padding:8px 14px;font-size:10px;font-weight:700;color:var(--tx2);text-align:left;border-bottom:1px solid var(--bd);min-width:100px;">MES</th>
+            <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:center;border-bottom:1px solid var(--bd);width:70px;">META</th>
+            <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--brand);text-align:left;border-bottom:1px solid var(--bd);min-width:200px;">% MENSUAL</th>
+            <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--ok);text-align:left;border-bottom:1px solid var(--bd);min-width:200px;">% ACUMULADO</th>
+            <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:center;border-bottom:1px solid var(--bd);width:120px;">ESTADO</th>
+          </tr></thead>
+          <tbody>
+            ${meses.map((m,mi)=>{
+              const fut=esFuturo(m);
+              const pct=fut?null:(vd?.meses[m]??null);
+              const mt=getMetaMes(emp.id,m);
+              const ac=fut?null:acum(mi);
+              const esMes=m===mesActual;
+              const col=cV(pct,mt), colA=cV(ac,mt);
+              const bW=pct==null?0:mt?Math.min(pct/mt*100,100):Math.min(pct,100);
+              const bA=ac==null?0:mt?Math.min(ac/mt*100,100):Math.min(ac,100);
+              const bg=esMes?"background:#EBF5FC;":mi%2?"background:var(--g25);":"";
+              return "<tr style='"+bg+"'>"
+                +"<td style='padding:9px 14px;font-size:12px;font-weight:700;color:"+(esMes?"var(--brand)":"var(--g700)")+"'>"+m+"</td>"
+                +"<td style='padding:9px 12px;text-align:center;font-size:12px;font-weight:700;color:var(--g600);'>"+(mt!=null?mt+"%":"&#8212;")+"</td>"
+                +"<td style='padding:9px 12px;'>"+(fut?"<span style='font-size:11px;color:var(--g300);'>&middot; Mes futuro</span>":pct==null?"<span style='font-size:11px;color:var(--g400);'>Sin dato</span>":bar(pct,col))+"</td>"
+                +"<td style='padding:9px 12px;'>"+(fut?"<span style='font-size:11px;color:var(--g300);'>&middot;</span>":ac==null?"<span style='font-size:11px;color:var(--g400);'>&#8212;</span>":bar(ac,colA))+"</td>"
+                +"<td style='padding:9px 12px;text-align:center;'>"+(fut?"<span style='color:var(--g300);'>&middot;</span>":chip(ac,mt))+"</td>"
+                +"</tr>";
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+      <div class="legend">
+        <div class="leg-item"><span class="val-chip val-chip-ok">\u2713 Sobre meta</span></div>
+        <div class="leg-item"><span class="val-chip val-chip-warn">\u2197 Cerca</span></div>
+        <div class="leg-item"><span class="val-chip val-chip-err">\u2198 Bajo meta</span></div>
+        <div class="leg-item"><span class="val-chip val-chip-na">Sin dato</span></div>
+        <div class="leg-item" style="margin-left:auto;font-size:10px;color:var(--g400);">% Acumulado = dato real de Recylink (fila "% Acumulado" del Sheet)</div>
+      </div>
+    </div>
+  `;
+}
+
+// ============================================================
+// RENDER PRINCIPAL
+// ============================================================
+function renderMain(){
+  const emp = EMPRESAS.find(e=>e.id===empActual);
+  const d = emp.mensual[mesActual];
+  // Pendientes = solo trazabilidad incompleta
+  const faltaCount = resImportados(emp,mesActual).filter(r=>{
+    const imp = esNuevoFormato(r) ? r.imp : 1;
+    return DOCS_TRAZO_COLS.some(doc=>{
+      const v = r.docs[doc];
+      if(v===null||v===undefined) return false;
+      if(typeof v === "number") return v < imp;
+      return v===false;
+    });
+  }).length;
+
+  let vistaHTML = "";
+  if(vistaActual==="mensual")   vistaHTML = renderMensual(emp, filtroActual);
+  else if(vistaActual==="anual") vistaHTML = renderAnual(emp);
+  else if(vistaActual==="obj")   vistaHTML = renderObjetivos(emp);
+  else if(vistaActual==="val")   vistaHTML = renderValorizacion(emp);
+
+  // Badge valorización: % del mes actual
+  const pctValBadge = (()=>{
+    const vd = VAL_DATA[emp.id];
+    if(!vd||esFuturo(mesActual)) return null;
+    return vd.meses[mesActual]??null;
+  })();
+
+  const now = new Date();
+  const fechaImpresion = now.toLocaleDateString('es-CL',{day:'2-digit',month:'long',year:'numeric'});
+
+  document.getElementById("main").innerHTML = `
+    <!-- CABECERA SOLO VISIBLE AL IMPRIMIR -->
+    <div class="print-header">
+      <img src="/mnt/user-data/uploads/LOGO_RECYLINK__COLOR_HORIZONTAL.webp" alt="Recylink">
+      <div class="print-header-info">
+        <div style="font-size:13px;font-weight:700;color:#101828;">${emp.nombre} · ${emp.sucursal}</div>
+        <div>Informe de Trazabilidad · ${mesActual} 2026</div>
+        <div>Generado el ${fechaImpresion}</div>
+      </div>
+    </div>
+    ${renderKPIs(emp)}
+    <div class="emp-header">
+      <div class="emp-title">
+        <div class="emp-av" style="background:${emp.colorBg};color:${emp.color}">${emp.letra}</div>
+        <div>
+          <div class="emp-name">${emp.sucursal}</div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        ${emp.logo
+          ? `<img src="${emp.logo}" alt="Logo ${emp.nombre}" style="height:36px;max-width:120px;object-fit:contain;border-radius:6px;border:1px solid var(--g200);padding:4px 8px;background:#fff;">`
+          : `<label title="Subir logo de la sucursal" style="display:flex;align-items:center;gap:6px;padding:6px 12px;border:1.5px dashed var(--g300);border-radius:8px;cursor:pointer;font-size:11px;font-weight:600;color:var(--g400);background:var(--g50);transition:all .12s;" onmouseover="this.style.borderColor='var(--brand)';this.style.color='var(--brand)'" onmouseout="this.style.borderColor='var(--g300)';this.style.color='var(--g400)'">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              Logo sucursal
+              <input type="file" accept="image/*" style="display:none;" onchange="(e=>{const f=e.target.files[0];if(!f)return;const url=URL.createObjectURL(f);EMPRESAS.find(x=>x.id==='${emp.id}').logo=url;renderSidebar();renderMain();})(event)">
+            </label>`}
+      </div>
+    </div>
+    <div class="vtabs">
+      <button class="vtab ${vistaActual==='obj'?'active':''}" onclick="setVista('obj')">
+        🎯 Objetivos
+        ${emp.objetivos.length>0?`<span class="vtab-badge">${emp.objetivos.filter(o=>objetivoCumplido_(o,mesActual)).length}/${emp.objetivos.length}</span>`:''}
+      </button>
+      <button class="vtab ${vistaActual==='mensual'?'active':''}" onclick="setVista('mensual')">
+        📋 Mensual detallado
+        ${faltaCount>0?`<span class="vtab-badge">${faltaCount} pendientes</span>`:''}
+      </button>
+      <button class="vtab ${vistaActual==='anual'?'active':''}" onclick="setVista('anual')">
+        📅 Vista anual
+      </button>
+      <button class="vtab ${vistaActual==='val'?'active':''}" onclick="setVista('val')">
+        ♻️ Valorización
+        ${pctValBadge!==null?`<span class="vtab-badge">${pctValBadge}%</span>`:''}
+      </button>
+    </div>
+    ${vistaHTML}
+  `;
+}
+
+// ============================================================
+// EXPORTAR / IMPRIMIR
+// ============================================================
+function descargarHTML(htmlContent, nombre){
+  try {
+    // Construir HTML completo
+    const doc = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+      +'<title>'+nombre+'</title>'
+      +'<style>@page{size:legal portrait;margin:14mm 12mm;}body{font-family:-apple-system,Arial,sans-serif;margin:14mm 12mm;color:#101828;print-color-adjust:exact;-webkit-print-color-adjust:exact;}</style>'
+      +'</head><body>'+htmlContent
+      +'<script>window.addEventListener("load",function(){window.print();});<\/script>'
+      +'</body></html>';
+
+    // Método 1: data URI con download
+    const encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(doc);
+    const a = document.createElement('a');
+    a.setAttribute('href', encoded);
+    a.setAttribute('download', nombre+'.html');
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ document.body.removeChild(a); }, 1000);
+
+  } catch(e) {
+    alert('Para exportar: usa Chrome o Edge y abre el archivo HTML descargado.');
+  }
+}
+
+function mostrarEnOverlay(htmlContent){
+  descargarHTML(htmlContent, 'Informe_Recylink_'+EMPRESA_NOMBRE+'_'+mesActual+'_2026');
+}
+function cerrarPrintOverlay(){ /* no-op */ }
+
+function abrirExport(){
+  const emp = EMPRESAS.find(e=>e.id===empActual);
+  document.getElementById("exportSubtitle").textContent =
+    `${emp.nombre} · ${emp.sucursal} · Informe completo 2026`;
+  document.getElementById("exportOverlay").classList.add("open");
+}
+function cerrarExport(){
+  document.getElementById("exportOverlay").classList.remove("open");
+}
+function exportarPDF(){
+  cerrarExport();
+  setTimeout(imprimirInformeCompleto, 100);
+}
+function exportarPrint(){
+  cerrarExport();
+  setTimeout(imprimirInformeCompleto, 100);
+}
+
+// Genera una vista de impresión completa con TODOS los meses
+function imprimirInformeCompleto(){
+  const emp   = EMPRESAS.find(e=>e.id===empActual);
+  const now   = new Date();
+  const fecha = now.toLocaleDateString('es-CL',{day:'2-digit',month:'long',year:'numeric'});
+
+  // ── Helpers de impresión ─────────────────────────────────────
+  function bdgP(v,imp){
+    if(v===null||v===undefined) return '<span style="color:#98A2B3;">—</span>';
+    if(typeof v==='number'){ if(v===0)return'<span style="color:#F04438;font-weight:700;">✗</span>'; if(v>=imp)return'<span style="color:#039855;font-weight:700;">✓</span>'; return'<span style="color:#92400E;font-weight:700;">'+v+'/'+imp+'</span>'; }
+    return v===true?'<span style="color:#039855;">✓</span>':'<span style="color:#F04438;">✗</span>';
+  }
+  function sec(titulo){ return '<div style="font-size:11px;font-weight:700;color:#0F4C81;text-transform:uppercase;letter-spacing:.5px;padding:10px 0 6px;border-bottom:2px solid #0F4C81;margin:18px 0 10px;">'+titulo+'</div>'; }
+  function kpi(lbl,val,col){ return '<div style="border:1px solid #E4E7EC;border-radius:8px;padding:10px 12px;"><div style="font-size:8px;font-weight:700;color:#667085;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;">'+lbl+'</div><div style="font-size:20px;font-weight:700;color:'+col+'">'+val+'</div></div>'; }
+
+  const pTrazoM = pctTrazabilidadMes(emp,mesActual)??0;
+  const pTrazoA = pctTrazabilidadAnual(emp)??0;
+  const pDocM   = pctDocumentosMes(emp,mesActual)??0;
+  const vd      = VAL_DATA[emp.id];
+  const pasadosV= MESES.filter(m=>!esFuturo(m)&&vd?.meses[m]!=null);
+  const pValM   = esFuturo(mesActual)?null:(vd?.meses[mesActual]??null);
+  const pValA   = pasadosV.length?Math.round(pasadosV.map(m=>vd.meses[m]).reduce((a,b)=>a+b)/pasadosV.length*10)/10:null;
+  const pCse    = pctCSE(emp);
+
+  let body = `
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 0 12px;border-bottom:2.5px solid #0F4C81;margin-bottom:14px;">
+      <div style="font-size:18px;font-weight:700;color:#0F4C81;">Recylink · Portal de Trazabilidad</div>
+      <div style="text-align:right;font-size:10px;color:#667085;">
+        <div style="font-size:13px;font-weight:700;color:#101828;">${EMPRESA_NOMBRE} · ${emp.sucursal}</div>
+        <div>Informe completo · ${mesActual} 2026</div>
+        <div>Generado el ${fecha}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:4px;">
+      ${kpi('Trazabilidad Mensual', pTrazoM+'%', colorPct(pTrazoM))}
+      ${kpi('Trazabilidad Anual',   pTrazoA+'%', colorPct(pTrazoA))}
+      ${kpi('Documentos Mensual',   pDocM+'%',   colorPct(pDocM))}
+      ${kpi('Valorización Mensual', pValM===null?'—':pValM+'%', colorPct(pValM??0))}
+      ${kpi('Valorización Anual',   pValA===null?'—':pValA+'%', colorPct(pValA??0))}
+      ${kpi('Seguimiento CSE',      pCse+'%',    colorPct(pCse))}
+    </div>`;
+
+  // ── 1. TRAZABILIDAD MENSUAL ──────────────────────────────────
+  body += sec('1. Trazabilidad Mensual · '+mesActual);
+  const resMes = resImportados(emp, mesActual);
+  if(!resMes.length){ body += '<p style="font-size:10px;color:#98A2B3;">Sin importaciones en '+mesActual+'.</p>'; }
+  else {
+    const TRAZO = ['Transportista','Disposición final'];
+    body += '<table style="width:100%;border-collapse:collapse;font-size:8px;margin-bottom:10px;">'
+      +'<thead><tr style="background:#EBF5FC;">'
+      +'<th style="padding:5px 8px;text-align:left;border-bottom:1px solid #E4E7EC;">Residuo</th>'
+      +'<th style="padding:5px;text-align:center;border-bottom:1px solid #E4E7EC;">Imp.</th>'
+      +TRAZO.map(d=>'<th style="padding:5px;text-align:center;border-bottom:1px solid #E4E7EC;">'+d+'</th>').join('')
+      +'<th style="padding:5px;text-align:center;border-bottom:1px solid #E4E7EC;background:#F9FAFB;">%</th>'
+      +'</tr></thead><tbody>'
+      +resMes.map((r,i)=>{
+        const imp=esNuevoFormato(r)?r.imp:1;
+        let ok=0,tot=0; ok+=imp;tot+=imp;
+        TRAZO.forEach(d=>{const f=docFrac(r.docs[d],imp);if(f){tot+=f[1];ok+=f[0];}});
+        const pR=tot===0?null:Math.round(ok/tot*100);
+        return '<tr class="'+(i%2?'even':'')+'">'
+          +'<td style="padding:5px 8px;border-bottom:1px solid #F2F4F7;font-weight:600;">'+r.nombre+'</td>'
+          +'<td style="padding:5px;text-align:center;border-bottom:1px solid #F2F4F7;font-weight:700;">'+imp+'</td>'
+          +TRAZO.map(d=>'<td style="padding:5px;text-align:center;border-bottom:1px solid #F2F4F7;">'+bdgP(r.docs[d],imp)+'</td>').join('')
+          +'<td style="padding:5px;text-align:center;border-bottom:1px solid #F2F4F7;font-weight:700;color:'+colorPct(pR??0)+';">'+(pR===null?'—':pR+'%')+'</td>'
+          +'</tr>';
+      }).join('')
+      +'</tbody></table>';
+  }
+
+  // ── 2. DOCUMENTOS MENSUAL ────────────────────────────────────
+  body += sec('2. Documentos Mensual · '+mesActual);
+  const DOCS_P = ['Cert. tratamiento','Factura','Cert. declaración'];
+  if(!resMes.length){ body += '<p style="font-size:10px;color:#98A2B3;">Sin importaciones en '+mesActual+'.</p>'; }
+  else {
+    body += '<table style="width:100%;border-collapse:collapse;font-size:8px;margin-bottom:10px;">'
+      +'<thead><tr style="background:#D1FADF;">'
+      +'<th style="padding:5px 8px;text-align:left;border-bottom:1px solid #E4E7EC;">Residuo</th>'
+      +'<th style="padding:5px;text-align:center;border-bottom:1px solid #E4E7EC;">Imp.</th>'
+      +['Cert. tratamiento','Factura','Declaración SINADER'].map(d=>'<th style="padding:5px;text-align:center;border-bottom:1px solid #E4E7EC;">'+d+'</th>').join('')
+      +'<th style="padding:5px;text-align:center;border-bottom:1px solid #E4E7EC;background:#F9FAFB;">%</th>'
+      +'</tr></thead><tbody>'
+      +resMes.map((r,i)=>{
+        const imp=esNuevoFormato(r)?r.imp:1;
+        let ok=0,tot=0;
+        DOCS_P.forEach(d=>{const f=docFrac(r.docs[d],imp);if(f){tot+=f[1];ok+=f[0];}});
+        const pR=tot===0?null:Math.round(ok/tot*100);
+        return '<tr class="'+(i%2?'even':'')+'">'
+          +'<td style="padding:5px 8px;border-bottom:1px solid #F2F4F7;font-weight:600;">'+r.nombre+'</td>'
+          +'<td style="padding:5px;text-align:center;border-bottom:1px solid #F2F4F7;font-weight:700;">'+imp+'</td>'
+          +DOCS_P.map(d=>'<td style="padding:5px;text-align:center;border-bottom:1px solid #F2F4F7;">'+bdgP(r.docs[d],imp)+'</td>').join('')
+          +'<td style="padding:5px;text-align:center;border-bottom:1px solid #F2F4F7;font-weight:700;color:'+colorPct(pR??0)+';">'+(pR===null?'—':pR+'%')+'</td>'
+          +'</tr>';
+      }).join('')
+      +'</tbody></table>';
+  }
+
+  // ── 3. TRAZABILIDAD ANUAL ────────────────────────────────────
+  body += sec('3. Trazabilidad Anual · Ene–Dic 2026');
+  body += '<table style="width:100%;border-collapse:collapse;font-size:8px;margin-bottom:10px;">'
+    +'<thead><tr style="background:#EBF5FC;">'
+    +'<th class="tl">Mes</th>'
+    +MESES.map(m=>'<th style="padding:4px 3px;text-align:center;border-bottom:1px solid #E4E7EC;font-size:7px;color:'+(esFuturo(m)?'#98A2B3':m===mesActual?'#0F4C81':'#667085')+'">'+m.slice(0,3)+'</th>').join('')
+    +'</tr></thead><tbody>'
+    +['Operaciones','Transportista','Disposición final'].map((item,i)=>{
+      return '<tr class="'+(i%2?'even':'')+'">'
+        +'<td style="padding:5px 8px;border-bottom:1px solid #F2F4F7;font-weight:600;">'+item+'</td>'
+        +MESES.map(m=>{
+          if(esFuturo(m)) return '<td class="mc" style="border-bottom:1px solid #F2F4F7;color:#D0D5DD;">·</td>';
+          if(item==='Operaciones'){
+            const r=resImportados(emp,m); return '<td style="padding:4px 3px;text-align:center;border-bottom:1px solid #F2F4F7;">'+(r.length?'<span style="color:#039855;font-weight:700;">✓</span>':'<span style="color:#F04438;font-weight:700;">✗</span>')+'</td>';
+          }
+          let ok=0,tot=0; resImportados(emp,m).forEach(r=>{const imp=esNuevoFormato(r)?r.imp:1;const f=docFrac(r.docs[item],imp);if(f){tot+=f[1];ok+=f[0];}});
+          if(!tot) return '<td style="padding:4px 3px;text-align:center;border-bottom:1px solid #F2F4F7;color:#D0D5DD;">—</td>';
+          return '<td style="padding:4px 3px;text-align:center;border-bottom:1px solid #F2F4F7;">'+(ok>=tot?'<span style="color:#039855;font-weight:700;">✓</span>':'<span style="color:#F04438;font-weight:700;">✗</span>')+'</td>';
+        }).join('')
+        +'</tr>';
+    }).join('')
+    +'</tbody></table>';
+
+  // ── 4. DOCUMENTOS ANUAL ──────────────────────────────────────
+  body += sec('4. Documentos Anual · Ene–Dic 2026');
+  body += '<table style="width:100%;border-collapse:collapse;font-size:8px;margin-bottom:10px;">'
+    +'<thead><tr style="background:#D1FADF;">'
+    +'<th style="padding:5px 8px;text-align:left;border-bottom:1px solid #E4E7EC;">Documento</th>'
+    +MESES.map(m=>'<th style="padding:4px 3px;text-align:center;border-bottom:1px solid #E4E7EC;font-size:7px;color:'+(esFuturo(m)?'#98A2B3':m===mesActual?'#0F4C81':'#667085')+'">'+m.slice(0,3)+'</th>').join('')
+    +'</tr></thead><tbody>'
+    +[['Cert. tratamiento','Cert. tratamiento'],['Factura','Factura'],['Declaración SINADER','Cert. declaración']].map(([lbl,key],i)=>{
+      return '<tr class="'+(i%2?'even':'')+'">'
+        +'<td style="padding:5px 8px;border-bottom:1px solid #F2F4F7;font-weight:600;">'+lbl+'</td>'
+        +MESES.map(m=>{
+          if(esFuturo(m)) return '<td class="mc" style="border-bottom:1px solid #F2F4F7;color:#D0D5DD;">·</td>';
+          let ok=0,tot=0; resImportados(emp,m).forEach(r=>{const imp=esNuevoFormato(r)?r.imp:1;const f=docFrac(r.docs[key],imp);if(f){tot+=f[1];ok+=f[0];}});
+          if(!tot) return '<td style="padding:4px 3px;text-align:center;border-bottom:1px solid #F2F4F7;color:#D0D5DD;">—</td>';
+          return '<td style="padding:4px 3px;text-align:center;border-bottom:1px solid #F2F4F7;">'+(ok>=tot?'<span style="color:#039855;font-weight:700;">✓</span>':'<span style="color:#F04438;font-weight:700;">✗</span>')+'</td>';
+        }).join('')
+        +'</tr>';
+    }).join('')
+    +'</tbody></table>';
+
+  // ── 5. VALORIZACIÓN ──────────────────────────────────────────
+  body += sec('5. Valorización · Ene–Dic 2026');
+  body += '<table style="width:100%;border-collapse:collapse;font-size:8px;margin-bottom:10px;">'
+    +'<thead><tr style="background:#F9FAFB;">'
+    +'<th style="padding:5px 8px;text-align:left;border-bottom:1px solid #E4E7EC;">Mes</th>'
+    +'<th style="padding:5px;text-align:center;border-bottom:1px solid #E4E7EC;">Meta</th>'
+    +'<th style="padding:5px;text-align:center;border-bottom:1px solid #E4E7EC;">% Mensual</th>'
+    +'<th style="padding:5px;text-align:center;border-bottom:1px solid #E4E7EC;">% Acumulado</th>'
+    +'<th style="padding:5px;text-align:center;border-bottom:1px solid #E4E7EC;">Estado</th>'
+    +'</tr></thead><tbody>'
+    +MESES.map((m,mi)=>{
+      const fut=esFuturo(m), pct=fut?null:(vd?.meses[m]??null);
+      const mt=getMetaMes(emp.id,m);
+      const ac=fut?(vd?.acumulado?.[m]??null):(vd?.acumulado?.[m]??null);
+      const col=pct===null?'#98A2B3':mt?pct>=mt?'#039855':pct>=mt*.7?'#F79009':'#F04438':colorPct(pct);
+      const colA=ac===null?'#98A2B3':mt?ac>=mt?'#039855':ac>=mt*.7?'#F79009':'#F04438':colorPct(ac);
+      const stato=fut?'·':ac===null?'Sin dato':mt?ac>=mt?'✓ Sobre meta':ac>=mt*.7?'↗ Cerca':'↘ Bajo meta':'—';
+      return '<tr style="background:'+(m===mesActual?'#EBF5FC':mi%2?'#F9FAFB':'#fff')+'">'
+        +'<td style="padding:5px 8px;border-bottom:1px solid #F2F4F7;font-weight:700;color:'+(m===mesActual?'#0F4C81':'#344054')+'">'+m+'</td>'
+        +'<td style="padding:5px;text-align:center;border-bottom:1px solid #F2F4F7;">'+( mt!=null?mt+'%':'—')+'</td>'
+        +'<td style="padding:5px;text-align:center;border-bottom:1px solid #F2F4F7;font-weight:700;color:'+col+'">'+(fut?'·':pct===null?'Sin dato':pct+'%')+'</td>'
+        +'<td style="padding:5px;text-align:center;border-bottom:1px solid #F2F4F7;font-weight:700;color:'+colA+'">'+(ac===null?'—':ac+'%')+'</td>'
+        +'<td style="padding:5px;text-align:center;border-bottom:1px solid #F2F4F7;color:'+colA+'">'+stato+'</td>'
+        +'</tr>';
+    }).join('')
+    +'</tbody></table>';
+
+  // ── 6. CSE ───────────────────────────────────────────────────
+  body += sec('6. Seguimiento CSE · Ene–Dic 2026');
+  body += '<table style="width:100%;border-collapse:collapse;font-size:8px;margin-bottom:10px;">'
+    +'<thead><tr style="background:#F9FAFB;">'
+    +'<th class="tl">Mes</th>'
+    +MESES.map(m=>'<th style="padding:4px 3px;text-align:center;border-bottom:1px solid #E4E7EC;font-size:7px;color:'+(esFuturo(m)?'#98A2B3':m===mesActual?'#0F4C81':'#667085')+'">'+m.slice(0,3)+'</th>').join('')
+    +'</tr></thead><tbody>'
+    +[['Correo de seguimiento','correo'],['Reunión de seguimiento','reunion']].map(([lbl,key],i)=>{
+      return '<tr class="'+(i%2?'even':'')+'">'
+        +'<td style="padding:5px 8px;border-bottom:1px solid #F2F4F7;font-weight:600;">'+lbl+'</td>'
+        +MESES.map(m=>{
+          // Igual que dotCSE(): se pinta el valor registrado, no esFuturo()
+          const v=emp.cse?.[key]?.[m];
+          return '<td style="padding:4px 3px;text-align:center;border-bottom:1px solid #F2F4F7;">'+(v===true?'<span style="color:#039855;font-weight:700;">✓</span>':v===false?'<span style="color:#F04438;font-weight:700;">✗</span>':'<span style="color:#D0D5DD;">·</span>')+'</td>';
+        }).join('')
+        +'</tr>';
+    }).join('')
+    +'</tbody></table>';
+
+  // ── 7. OBJETIVOS ─────────────────────────────────────────────
+  if(emp.objetivos.length){
+    body += sec('7. Objetivos 2026');
+    body += '<table style="width:100%;border-collapse:collapse;font-size:8px;margin-bottom:10px;">'
+      +'<thead><tr style="background:#F9FAFB;">'
+      +'<th style="padding:5px 8px;text-align:left;border-bottom:1px solid #E4E7EC;">Objetivo</th>'
+      +'<th style="padding:5px;text-align:center;border-bottom:1px solid #E4E7EC;">Meta</th>'
+      +'<th style="padding:5px;text-align:center;border-bottom:1px solid #E4E7EC;">Avance</th>'
+      +'<th style="padding:5px;text-align:center;border-bottom:1px solid #E4E7EC;">Estado</th>'
+      +'</tr></thead><tbody>'
+      +emp.objetivos.map((o,i)=>{
+        const esTraz=/trazabilidad/i.test(o.texto);
+        const av=esTraz?pctTrazabilidadAnual(emp):o.avance??0;
+        const mt=o.meta??100;
+        const ok=av>=mt;
+        return '<tr class="'+(i%2?'even':'')+'">'
+          +'<td style="padding:5px 8px;border-bottom:1px solid #F2F4F7;font-weight:500;">'+o.texto+'</td>'
+          +'<td style="padding:5px;text-align:center;border-bottom:1px solid #F2F4F7;">'+mt+'%</td>'
+          +'<td style="padding:5px;text-align:center;border-bottom:1px solid #F2F4F7;font-weight:700;color:'+colorPct(av)+'">'+av+'%</td>'
+          +'<td style="padding:5px;text-align:center;border-bottom:1px solid #F2F4F7;color:'+(ok?'#039855':'#F04438')+';font-weight:700;">'+(ok?'✓ Cumplido':'✗ Pendiente')+'</td>'
+          +'</tr>';
+      }).join('')
+      +'</tbody></table>';
+  }
+
+  // Abrir como blob URL para evitar bloqueo de popup
+  const fullHtml = '<!DOCTYPE html><html><head>'
+    +'<meta charset="UTF-8">'
+    +'<title>Informe '+EMPRESA_NOMBRE+' · '+emp.sucursal+' · 2026</title>'
+    +'<style>'
+    +CSS
+    +'</style>'
+    +'</head><body>'+body
+    +'<div class="footer"><span>Recylink · Portal de Trazabilidad</span>'
+    +'<span>'+EMPRESA_NOMBRE+' · '+emp.sucursal+' · '+mesActual+' 2026</span>'
+    +'<span>Generado el '+fecha+'</span></div>'
+    +'<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script>'
+    +'</body></html>';
+  const blob = new Blob([fullHtml], {type:'text/html;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
+}
+
+// ============================================================
+// SELECTOR DE EMPRESA/SUCURSAL EN TOPBAR
+// ============================================================
+function buildEmpresaSelect(){ /* selector de empresa eliminado */ }
+
+function buildSucursalSelect(){
+  const sel = document.getElementById("selSucursal");
+  if(!sel) return;
+  sel.innerHTML = EMPRESAS.map(e=>
+    `<option value="${e.id}" ${e.id===empActual?'selected':''}>${e.sucursal}</option>`
+  ).join('');
+}
+
+function setEmpDesdeSelect(id){
+  empActual = id;
+  filtroActual = "todos";
+  vistaActual = "mensual";
+  renderSidebar();
+  renderMain();
+}
+
+// ============================================================
+// EVENTOS
+// ============================================================
+function setEmp(id){ empActual=id; filtroActual="todos"; vistaActual="mensual"; renderSidebar(); renderMain(); buildSucursalSelect(); }
+function setVista(v){  vistaActual=v; renderMain(); }
+function setFiltro(f){ filtroActual=f; renderMain(); }
+function setMes(m){    mesActual=m;   filtroActual="todos"; renderSidebar(); renderMain(); }
+
+
+// ============================================================
+// CHECK LIST — vista general de sucursales x mes
+// ============================================================
+function actualizarClStats(){
+  const conDetalle = EMPRESAS.filter(e => (e.mensual[mesActual]?.obs||'').trim().length > 0).length;
+  const el = document.getElementById('clStats');
+  if(el) el.textContent = conDetalle + ' de ' + EMPRESAS.length + ' sucursales con observación en Excel';
+}
+
+function abrirCheckList(){
+  document.getElementById('clMesTitle').textContent = mesActual + ' 2026';
+  renderClBody();
+  document.getElementById('clOverlay').classList.add('open');
+}
+
+function cerrarCheckList(){
+  document.getElementById('clOverlay').classList.remove('open');
+}
+
+function renderClBody(){
+  const tbody = document.getElementById('clBody');
+  if(!tbody) return;
+
+  let okCount=0, errCount=0;
+  tbody.innerHTML = EMPRESAS.map((emp, i)=>{
+    // Trazabilidad: ✓ si hubo operaciones ese mes
+    const res     = resImportados(emp, mesActual);
+    const trazo   = pctTrazabilidadMes(emp, mesActual);
+    const tieneOp = res.length > 0;
+    if(tieneOp) okCount++; else errCount++;
+
+    // Valorización acumulada: SOLO dato real del Sheet
+    const vd      = VAL_DATA[emp.id];
+    const mi      = MESES.indexOf(mesActual);
+    const acumOrd = MESES.filter(m=>vd?.acumulado?.[m]!=null && MESES.indexOf(m)<=mi);
+    const ultimoAcumCl = acumOrd.slice(-1)[0];
+    const pValAc  = ultimoAcumCl!==undefined ? vd.acumulado[ultimoAcumCl] : null;
+    // ¿El acumulado que estamos mostrando es el del mes seleccionado, o venimos
+    // arrastrando el de un mes anterior porque el Sheet aún no tiene este mes?
+    const tieneActual = vd?.acumulado?.[mesActual] != null;
+    const metaV   = getMetaMes(emp.id, mesActual);
+    const colV    = pValAc===null?'var(--g300)':metaV?pValAc>=metaV?'var(--ok)':pValAc>=metaV*.7?'var(--warn)':'var(--err)':colorPct(pValAc);
+
+    const detalle = emp.mensual[mesActual]?.obs || '';
+    const bg = i%2===0?'':'background:var(--g25)';
+    const trClass = emp.id===empActual?'style="background:var(--clr-l);"':'style="'+bg+'"';
+
+    return `<tr ${trClass}>
+      <td style="padding:10px 16px;font-size:12px;font-weight:${emp.id===empActual?'700':'500'};color:${emp.id===empActual?'var(--brand)':'var(--g800)'};">
+        ${emp.sucursal}
+      </td>
+      <td style="padding:10px 12px;text-align:center;">
+        ${esFuturo(mesActual)
+          ? '<span style="color:var(--g300);font-size:11px;">·</span>'
+          : tieneOp
+            ? '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;"><span style="font-size:16px;font-weight:700;color:var(--ok);">✓</span><span style="font-size:9px;color:var(--ok);">'+(trazo!==null?trazo+'%':'')+'</span></div>'
+            : '<span style="font-size:16px;font-weight:700;color:var(--err);">✗</span>'}
+      </td>
+      <td style="padding:10px 12px;text-align:center;">
+        ${pValAc===null
+          ? '<span style="font-size:11px;color:var(--g300);">—</span>'
+          : '<div style="display:flex;flex-direction:column;align-items:center;gap:2px;">'
+              +'<span style="font-size:16px;font-weight:700;color:'+colV+';">'+pValAc+'%</span>'
+              +(metaV!==null?'<span style="font-size:9px;color:var(--g500);font-weight:600;">meta '+metaV+'%</span>':'')
+              +(!tieneActual?'<span style="font-size:9px;color:var(--warn);font-weight:600;">↻ Sin '+mesActual+'</span>':'')
+            +'</div>'}
+      </td>
+      <td style="padding:8px 12px;">
+        ${detalle
+          ? '<span style="font-size:11px;color:var(--g700);line-height:1.5;">'+detalle+'</span>'
+          : '<span style="font-size:11px;color:var(--g300);">—</span>'}
+      </td>
+    </tr>`;
+  }).join('');
+
+  actualizarClStats();
+}
+
+function exportarCheckListExcel(){
+  const mi = MESES.indexOf(mesActual);
+  const rows = [
+    ['Sucursal', 'Trazabilidad', '% Trazabilidad', '% Valorización Acumulada', 'Observación']
+  ];
+
+  EMPRESAS.forEach(emp=>{
+    const res     = resImportados(emp, mesActual);
+    const tieneOp = res.length > 0;
+    const trazo   = pctTrazabilidadMes(emp, mesActual);
+    const vd      = VAL_DATA[emp.id];
+    const pasados = MESES.slice(0,mi+1).filter(m=>!esFuturo(m)&&vd?.meses[m]!=null);
+    const pValAc  = pasados.length?Math.round(pasados.map(m=>vd.meses[m]).reduce((a,b)=>a+b)/pasados.length*10)/10:null;
+    const detalle = emp.mensual[mesActual]?.obs || '';
+
+    rows.push([
+      emp.sucursal,
+      tieneOp ? '✓ Operó' : '✗ Sin operaciones',
+      trazo !== null ? trazo + '%' : '—',
+      pValAc !== null ? pValAc + '%' : '—',
+      detalle || ''
+    ]);
+  });
+
+  // Generar CSV con BOM para que Excel lo abra bien
+  const bom  = '﻿';
+  const csv  = bom + rows.map(r => r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'CheckList_' + EMPRESA_NOMBRE + '_' + mesActual + '_2026.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// CARGA DE DATOS DESDE GOOGLE SHEETS (Apps Script Web App)
+// ============================================================
+let datosCargados = false;
+
+function actualizarSelectorMeses_(){
+  const sel = document.getElementById("selMes");
+  if(!sel) return;
+  sel.innerHTML = MESES_ACTIVOS.map(m =>
+    `<option value="${m}" ${m===mesActual?'selected':''}>${m} 2026</option>`
+  ).join("");
+}
+
+// Último mes de MESES_ACTIVOS con al menos un residuo importado en alguna
+// sucursal. Devuelve null si todavía no hay ningún dato de trazabilidad.
+function ultimoMesConResiduos_(){
+  const conDatos = MESES_ACTIVOS.filter(m =>
+    EMPRESAS.some(e => (e.mensual[m]?.residuos || []).length > 0)
+  );
+  return conDatos[conDatos.length - 1] || null;
+}
+
+function cargarDatos(esRefrescoSilencioso){
+  if(!esRefrescoSilencioso) mostrarEstadoCarga_("Cargando datos desde Google Sheets…");
+
+  const callbackName = "__onDatosRecylink_" + Date.now();
+  window[callbackName] = function(payload){
+    delete window[callbackName];
+    scriptTag.remove();
+
+    if(!payload || payload.error){
+      mostrarEstadoCarga_("Error al cargar datos: " + (payload && payload.message ? payload.message : "desconocido") + ". Reintentando en " + REFRESH_MINUTOS + " min.");
+      return;
+    }
+
+    EMPRESAS.length = 0;
+    payload.EMPRESAS.forEach(e => EMPRESAS.push(e));
+
+    Object.keys(VAL_DATA).forEach(k => delete VAL_DATA[k]);
+    Object.assign(VAL_DATA, payload.VAL_DATA);
+
+    MESES_ACTIVOS = payload.MESES_ACTIVOS && payload.MESES_ACTIVOS.length
+      ? payload.MESES_ACTIVOS
+      : MESES_ACTIVOS;
+
+    if(!empActual && EMPRESAS.length) empActual = EMPRESAS[0].id;
+
+    // Horizonte de trazabilidad: se recalcula en cada carga y lo consume esFuturo()
+    ULTIMO_MES_DATOS = ultimoMesConResiduos_();
+
+    if(!mesActual || !MESES_ACTIVOS.includes(mesActual)) {
+      // Abrir en el último mes que REALMENTE tiene residuos cargados.
+      // MESES_ACTIVOS puede incluir meses que solo existen en Seguimiento_CSE
+      // o Valorización; abrir ahí mostraría una pantalla vacía.
+      mesActual = ultimoMesConResiduos_()
+                || MESES_ACTIVOS[MESES_ACTIVOS.length - 1]
+                || "Enero";
+    }
+
+    actualizarSelectorMeses_();
+
+    datosCargados = true;
+    ocultarEstadoCarga_();
+
+    renderSidebar();
+    renderMain();
+    buildEmpresaSelect();
+    buildSucursalSelect();
+  };
+
+  const scriptTag = document.createElement("script");
+  // Si el link tiene ?suc=<id>, se lo pasamos al Apps Script para que
+  // filtre en el servidor y solo devuelva esa sucursal (links externos).
+  const sucFiltro = new URLSearchParams(window.location.search).get("suc");
+  const sufijoSuc = sucFiltro ? "&suc=" + encodeURIComponent(sucFiltro) : "";
+  scriptTag.src = DATA_SOURCE_URL + "?callback=" + callbackName + sufijoSuc + "&_=" + Date.now();
+  scriptTag.onerror = function(){
+    delete window[callbackName];
+    mostrarEstadoCarga_("No se pudo contactar la fuente de datos. Reintentando en " + REFRESH_MINUTOS + " min.");
+  };
+  document.body.appendChild(scriptTag);
+}
+
+function mostrarEstadoCarga_(msg){
+  let el = document.getElementById("estado-carga");
+  if(!el){
+    el = document.createElement("div");
+    el.id = "estado-carga";
+    el.style.cssText = "position:fixed;top:0;left:0;right:0;z-index:9999;background:#0069A6;color:#fff;font-size:12px;font-weight:600;padding:6px 16px;text-align:center;";
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.display = "block";
+}
+function ocultarEstadoCarga_(){
+  const el = document.getElementById("estado-carga");
+  if(el) el.style.display = "none";
+}
+
+// INIT
+cargarDatos(false);
+setInterval(() => cargarDatos(true), REFRESH_MINUTOS * 60 * 1000);
+
+  const CSS = `
+    @page { size: legal portrait; margin: 16mm 14mm 12mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, 'Segoe UI', Arial, sans-serif;
+      color: #1a1a2e; background: #fff;
+      font-size: 8.5px; line-height: 1.5;
+    }
+    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+
+    /* ── CABECERA ── */
+    .ph {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-bottom: 10px; margin-bottom: 16px;
+      border-bottom: 3px solid #0F4C81;
+    }
+    .ph-left { display: flex; align-items: center; gap: 10px; }
+    .ph-circle {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: linear-gradient(135deg, #0F4C81, #1a7fd4);
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 18px; font-weight: 700; flex-shrink: 0;
+    }
+    .ph-brand  { font-size: 15px; font-weight: 700; color: #0F4C81; letter-spacing: -.3px; }
+    .ph-portal { font-size: 9px; color: #667085; margin-top: 1px; }
+    .ph-right  { text-align: right; }
+    .ph-suc    { font-size: 11px; font-weight: 700; color: #101828; }
+    .ph-meta   { font-size: 8px; color: #667085; margin-top: 2px; }
+    .ph-badge  {
+      display: inline-block; margin-top: 4px;
+      padding: 2px 8px; border-radius: 999px;
+      background: #EBF5FC; color: #0F4C81;
+      font-size: 8px; font-weight: 700; letter-spacing: .3px;
+    }
+
+    /* ── KPI GRID ── */
+    .kgrid { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin-bottom: 16px; }
+    .kbox {
+      border: 1px solid #e8edf2; border-radius: 9px;
+      padding: 9px 11px; position: relative; overflow: hidden;
+    }
+    .kbox::before {
+      content: ''; position: absolute; top: 0; left: 0;
+      width: 4px; height: 100%; background: #e8edf2; border-radius: 9px 0 0 9px;
+    }
+    .kbox.c-blue::before  { background: #0F4C81; }
+    .kbox.c-green::before { background: #039855; }
+    .kbox.c-orange::before{ background: #F79009; }
+    .kbox.c-purple::before{ background: #5925DC; }
+    .kbox.hi { background: #f0f7ff; border-color: #b3d4f5; }
+    .klbl { font-size: 7.5px; font-weight: 600; color: #667085; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+    .kval { font-size: 22px; font-weight: 700; line-height: 1; }
+    .kdesc{ font-size: 7.5px; color: #98A2B3; margin-top: 3px; }
+
+    /* ── SECCIONES ── */
+    .sec {
+      display: flex; align-items: center; gap: 8px;
+      margin: 16px 0 8px;
+    }
+    .sec-num {
+      width: 18px; height: 18px; border-radius: 5px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 8px; font-weight: 700; color: #fff;
+    }
+    .sec-title { font-size: 9.5px; font-weight: 700; color: #101828; text-transform: uppercase; letter-spacing: .5px; }
+    .sec-line  { flex: 1; height: 1px; background: #e8edf2; }
+
+    /* ── TABLAS ── */
+    table  { width: 100%; border-collapse: collapse; margin-bottom: 2px; }
+    thead tr { background: #f8fafc; }
+    th {
+      padding: 5px 7px; font-size: 7.5px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .3px;
+      text-align: center; color: #475467;
+      border-bottom: 1.5px solid #e8edf2;
+      white-space: nowrap;
+    }
+    th.tl { text-align: left; }
+    td {
+      padding: 5px 7px; font-size: 8px;
+      border-bottom: 1px solid #f2f4f7;
+      text-align: center; vertical-align: middle;
+      color: #344054;
+    }
+    td.tl { text-align: left; font-weight: 600; color: #101828; }
+    tr:last-child td { border-bottom: none; }
+    tr.even td { background: #fafbfc; }
+    tr.act td  { background: #f0f7ff; }
+    tr.act td.tl { color: #0F4C81; font-weight: 700; }
+
+    /* ── ESTADO ── */
+    .ok  { color: #039855; font-weight: 700; }
+    .err { color: #F04438; font-weight: 700; }
+    .na  { color: #cdd2d9; }
+    .warn{ color: #F79009; font-weight: 700; }
+    .mc  { width: 22px; padding: 4px 2px; }
+
+    /* ── BADGE ── */
+    .badge { display: inline-block; padding: 2px 7px; border-radius: 999px; font-size: 7.5px; font-weight: 700; }
+    .b-ok  { background: #D1FADF; color: #027A48; }
+    .b-err { background: #FEE4E2; color: #B42318; }
+    .b-warn{ background: #FEF0C7; color: #92400E; }
+    .b-na  { background: #f2f4f7; color: #667085; }
+
+    /* ── BARRA ── */
+    .bw { display: flex; align-items: center; gap: 5px; justify-content: center; }
+    .bb { height: 6px; width: 60px; background: #f2f4f7; border-radius: 999px; overflow: hidden; }
+    .bf { height: 100%; border-radius: 999px; }
+    .bv { font-size: 9px; font-weight: 700; min-width: 28px; }
+
+    /* ── FOOTER ── */
+    .footer {
+      margin-top: 20px; padding-top: 8px;
+      border-top: 1px solid #e8edf2;
+      display: flex; justify-content: space-between;
+      font-size: 7px; color: #98A2B3;
+    }
+  `;
+
+  function secHtml(n, titulo, color){
+    return '<div class="sec">'
+      +'<div class="sec-num" style="background:'+color+'">'+n+'</div>'
+      +'<span class="sec-title">'+titulo+'</span>'
+      +'<div class="sec-line"></div>'
+      +'</div>';
+  }
+  function kpiBox(lbl,val,col,cls){
+    return '<div class="kbox hi '+cls+'">'
+      +'<div class="klbl">'+lbl+'</div>'
+      +'<div class="kval" style="color:'+col+'">'+val+'</div>'
+      +'</div>';
+  }
+  function badge(txt,tipo){ return '<span class="badge b-'+tipo+'">'+txt+'</span>'; }
+  function barCell(pct,col,meta){
+    const w=meta?Math.min(Math.round(pct/meta*100),100):Math.min(pct,100);
+    return '<div class="bw"><div class="bb"><div class="bf" style="width:'+w+'%;background:'+col+'"></div></div>'
+      +'<span class="bv" style="color:'+col+'">'+pct+'%</span></div>';
+  }
+  function cVal(p,m){ if(p===null)return'#cdd2d9'; if(m===null)return colorPct(p); return p>=m?'#039855':p>=m*.7?'#F79009':'#F04438'; }
+  function stBadge(p,m){
+    if(p===null)return badge('Sin dato','na');
+    if(m===null)return badge(p+'%',p>=80?'ok':p>=40?'warn':'err');
+    return p>=m?badge('✓ Sobre meta','ok'):p>=m*.7?badge('↗ Cerca','warn'):badge('↘ Bajo meta','err');
+  }
+
+
+
+  function secHtml(n, titulo, color){
+    return '<div class="sec">'
+      +'<div class="sec-num" style="background:'+color+'">'+n+'</div>'
+      +'<span class="sec-title">'+titulo+'</span>'
+      +'<div class="sec-line"></div>'
+      +'</div>';
+  }
+  function kpiBox(lbl,val,col,cls){
+    return '<div class="kbox hi '+cls+'">'
+      +'<div class="klbl">'+lbl+'</div>'
+      +'<div class="kval" style="color:'+col+'">'+val+'</div>'
+      +'</div>';
+  }
+  function badge(txt,tipo){ return '<span class="badge b-'+tipo+'">'+txt+'</span>'; }
+  function barCell(pct,col,meta){
+    const w=meta?Math.min(Math.round(pct/meta*100),100):Math.min(pct,100);
+    return '<div class="bw"><div class="bb"><div class="bf" style="width:'+w+'%;background:'+col+'"></div></div>'
+      +'<span class="bv" style="color:'+col+'">'+pct+'%</span></div>';
+  }
+  function cVal(p,m){ if(p===null)return'#cdd2d9'; if(m===null)return colorPct(p); return p>=m?'#039855':p>=m*.7?'#F79009':'#F04438'; }
+  function stBadge(p,m){
+    if(p===null)return badge('Sin dato','na');
+    if(m===null)return badge(p+'%',p>=80?'ok':p>=40?'warn':'err');
+    return p>=m?badge('✓ Sobre meta','ok'):p>=m*.7?badge('↗ Cerca','warn'):badge('↘ Bajo meta','err');
+  }
+
+
+
+</script>
+</body>
+</html>
