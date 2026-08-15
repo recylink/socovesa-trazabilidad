@@ -158,15 +158,6 @@ tr:hover td{background:var(--g25);}
 .val-chip-warn{background:var(--warn-l);color:#92400E;}
 .val-chip-err{background:var(--err-l);color:var(--err);}
 .val-chip-na{background:var(--na-l);color:var(--na);}
-/* Banner de brecha vs meta — traduce el cumplimiento binario del objetivo en avance parcial */
-.val-gap{padding:10px 14px;border-radius:10px;border:1px solid var(--bd);margin-bottom:14px;font-size:12px;}
-.val-gap-t{font-weight:700;margin-bottom:2px;}
-.val-gap-d{font-size:11px;opacity:.85;}
-.val-gap-n{font-size:10px;color:var(--g400);margin-top:4px;}
-.val-gap-ok{background:var(--ok-l);color:var(--ok);border-color:var(--ok);}
-.val-gap-warn{background:var(--warn-l);color:#92400E;}
-.val-gap-err{background:var(--err-l);color:var(--err);}
-.val-gap-na{background:var(--na-l);color:var(--na);}
 .vt-wrap{overflow-x:auto;}
 .vt-table{min-width:900px;border-collapse:collapse;width:100%;}
 .vt-table th{padding:8px 10px;font-size:9px;font-weight:700;color:var(--tx2);text-align:center;border-bottom:1px solid var(--bd);background:var(--g50);text-transform:uppercase;letter-spacing:.4px;white-space:nowrap;}
@@ -200,6 +191,41 @@ tr:hover td{background:var(--g25);}
 .leg-item{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--tx2);}
 .empty{padding:40px;text-align:center;color:var(--tx2);font-size:12px;}
 .sidebar{width:232px;background:#fff;border-right:1px solid var(--bd);flex-shrink:0;position:sticky;top:58px;height:calc(100vh - 58px);overflow-y:auto;}
+
+/* ── MINUTAS (integrado al visor) ── */
+.mn-sb-empty{padding:14px 16px;font-size:11.5px;color:var(--tx2);line-height:1.5;}
+.mn-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.mn-topbtn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1.5px solid var(--bd);border-radius:8px;font-family:inherit;font-size:11.5px;font-weight:600;color:var(--g700);background:#fff;cursor:pointer;transition:all .12s;}
+.mn-topbtn:hover{border-color:var(--brand);color:var(--brand);}
+.mn-topbtn.primary{background:var(--brand);border-color:var(--brand);color:#fff;}
+.mn-topbtn.primary:hover{background:var(--p500);color:#fff;}
+.mn-topbtn:disabled{opacity:.45;cursor:not-allowed;}
+.mn-status{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--tx2);}
+.mn-status-dot{width:7px;height:7px;border-radius:50%;background:var(--g400);flex-shrink:0;}
+.mn-status-dot.ok{background:var(--ok);}
+.mn-status-dot.err{background:var(--err);}
+.mn-cfg{padding:10px 14px;border-top:1px solid var(--bd);background:var(--g50);display:none;}
+.mn-cfg.open{display:block;}
+.mn-cfg label{display:block;font-size:10.5px;font-weight:700;color:var(--g700);margin-bottom:5px;}
+.mn-cfg input[type=text]{width:100%;padding:7px 10px;border:1.5px solid var(--bd);border-radius:7px;font-family:inherit;font-size:11.5px;color:var(--tx);background:#fff;outline:none;margin-bottom:8px;}
+.mn-cfg .hint{display:block;font-size:10px;color:var(--tx2);margin-bottom:8px;line-height:1.5;}
+th.mn-mc{width:32px;text-align:center;}
+th.mn-rc{width:32px;text-align:center;}
+td.mn-mc{text-align:center;vertical-align:middle;}
+.mn-item-input{width:100%;border:none;background:transparent;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--tx);padding:4px 2px;outline:none;border-bottom:1px dashed transparent;resize:vertical;min-height:20px;line-height:1.4;}
+.mn-item-input:focus{border-bottom-color:var(--brand);}
+.mn-cell-textarea{width:100%;min-height:38px;border:1px solid transparent;background:transparent;font-family:inherit;font-size:12px;color:var(--g700);padding:5px 6px;border-radius:6px;resize:vertical;outline:none;line-height:1.45;}
+.mn-cell-textarea:hover{background:var(--g50);}
+.mn-cell-textarea:focus{border-color:var(--brand);background:#fff;}
+tr.mn-done td{background:var(--g50);}
+tr.mn-done .mn-item-input{text-decoration:line-through;color:var(--g400);}
+tr.mn-done .mn-cell-textarea{color:var(--g400);}
+.mn-remove-btn{background:none;border:none;color:var(--g400);cursor:pointer;font-size:13px;padding:4px 6px;border-radius:6px;}
+.mn-remove-btn:hover{color:var(--err);background:var(--err-l);}
+.mn-empty-state{padding:36px 20px;text-align:center;color:var(--tx2);font-size:13px;}
+.mn-toast{position:fixed;bottom:24px;right:24px;background:var(--g900);color:#fff;padding:11px 18px;border-radius:10px;font-size:13px;box-shadow:0 8px 24px rgba(16,24,40,0.25);opacity:0;transform:translateY(8px);transition:all .25s ease;pointer-events:none;z-index:600;max-width:340px;}
+.mn-toast.show{opacity:1;transform:translateY(0);}
+.mn-toast.err{background:var(--err);}
 @media(max-width:900px){.kpi-row{grid-template-columns:repeat(2,1fr);}}
 @media(max-width:1100px){.main [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important;}}
 
@@ -306,8 +332,7 @@ tr:hover td{background:var(--g25);}
 
   /* Progreso bars */
   .prog-bg, .prog-fill, .vt-avance-fill,
-  .vt-mes-bar-fill, .av-fill, .bar-fill,
-  .val-gap { print-color-adjust: exact !important; }
+  .vt-mes-bar-fill, .av-fill, .bar-fill { print-color-adjust: exact !important; }
 
   /* Ocultar elementos secundarios en impresión */
   .legend { display: none !important; }
@@ -354,6 +379,11 @@ tr:hover td{background:var(--g25);}
       </select>
     </div>
     
+    <!-- ACCESO A MINUTAS -->
+    <button class="mn-topbtn ${''}" id="mnAccessBtn" type="button" onclick="mnToggleVista()" style="height:34px;">
+      📝 <span id="mnAccessBtnLabel">Minutas</span>
+    </button>
+
     <button class="btn-export" onclick="abrirExport()">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Exportar informe
@@ -398,14 +428,12 @@ tr:hover td{background:var(--g25);}
 // ============================================================
 // ★ CONFIGURACIÓN DE LA EMPRESA — EDITAR AQUÍ
 // ============================================================
-const EMPRESA_NOMBRE  = "Socovesa";
-const EMPRESA_COLOR   = "#B54708";        // ← color hex de la empresa
-const EMPRESA_COLOR_L = "#FFF6ED";        // ← color claro (fondo)
+const EMPRESA_NOMBRE  = "Socovesa";        // ← nombre que aparece en el visor
+const EMPRESA_COLOR   = "#6941C6";         // ← color hex de la empresa
+const EMPRESA_COLOR_L = "#F9F5FF";         // ← color claro (fondo)
 
 // ============================================================
 // ★ CONEXIÓN CON GOOGLE SHEETS (Apps Script Web App) — EDITAR AQUÍ
-// Pega aquí la URL /exec que te entrega Apps Script al implementar
-// Code.gs DENTRO de la planilla "Socovesa" (Extensiones → Apps Script).
 // ============================================================
 const DATA_SOURCE_URL = "https://script.google.com/macros/s/AKfycbx5mKQ873Ob_3Yd4n1kUI5imxEpXO5UzllhMpYGCoIBFHwBKSI9Moct7p9SYuEL9znM/exec";
 // Cada cuántos minutos se refresca el dato en segundo plano (sin recargar la página)
@@ -417,9 +445,11 @@ const REFRESH_MINUTOS = 5;
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 let MESES_ACTIVOS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio"];
 // (ya no se usa un "mes futuro fijo": esFuturo() se calcula directo desde MESES_ACTIVOS)
+const DOCS_RES = ["Cert. tratamiento","Factura","Cert. declaración","Transportista","Disposición final"];
 // ── Grupos de docs para la vista mensual dividida ─────────
-const DOCS_TRAZO_COLS = ["Transportista","Disposición final"];               // trazabilidad
+const DOCS_TRAZO_COLS = ["Transportista","Disposición final"]; // + Importaciones = trazabilidad
 const DOCS_DOC_COLS   = ["Cert. tratamiento","Factura","Cert. declaración"]; // documentos
+const DOCS_TRAZO = ["Importado","Cert. tratamiento","Cert. declaración"];
 
 // ============================================================
 // CATÁLOGO DE RESIDUOS — 139 tipos con código LER
@@ -564,17 +594,7 @@ const VAL_DATA = {};
 // Store para metas editadas en vivo (empId → {mes → valor})
 const METAS_VAL_STORE = {};
 function getMetaMes(empId, mes){
-  const manual = METAS_VAL_STORE[empId]?.[mes];
-  if(manual!=null) return manual;
-  // Si no hay meta exacta para este mes, usar la última meta cargada hasta este mes
-  // (las metas suelen mantenerse constantes; puede que aún no se haya llenado el
-  // mes más reciente en el Sheet).
-  const vd = VAL_DATA[empId];
-  if(!vd) return null;
-  const idxHasta = MESES.indexOf(mes);
-  const ms = MESES.slice(0, idxHasta+1).filter(m=>vd.meta?.[m]!=null);
-  const u = ms[ms.length-1];
-  return u!==undefined ? vd.meta[u] : null;
+  return METAS_VAL_STORE[empId]?.[mes] ?? VAL_DATA[empId]?.meta?.[mes] ?? null;
 }
 function setMetaMes(empId, mes, val){
   if(!METAS_VAL_STORE[empId]) METAS_VAL_STORE[empId]={};
@@ -588,6 +608,7 @@ function setMetaMes(empId, mes, val){
 let mesActual = null;   // ← se define automáticamente al cargar los datos
 let empActual = null;   // ← se define automáticamente al cargar los datos
 let vistaActual = "mensual";
+let vistaGlobal = "empresa"; // "empresa" | "minutas"
 let filtroActual = "todos";
 
 // ============================================================
@@ -595,19 +616,10 @@ let filtroActual = "todos";
 // ============================================================
 const colorPct = p => p>=80?"#039855":p>=50?"#F79009":"#F04438";
 
-// Horizonte de las métricas de trazabilidad y documentos: el último mes que
-// tiene residuos cargados. Se fija en cargarDatos() y se cachea porque esFuturo()
-// se llama dentro de bucles de render.
-// OJO: no se usa el último de MESES_ACTIVOS, porque ese arreglo también incluye
-// meses que solo existen en Seguimiento_CSE o Valorización — meses sin ninguna
-// operación que evaluar. Seguimiento CSE no usa esFuturo(): muestra el valor que
-// tenga, exista o no trazabilidad ese mes.
-let ULTIMO_MES_DATOS = null;
-
 function esFuturo(mes){
-  const ref = ULTIMO_MES_DATOS || MESES_ACTIVOS[MESES_ACTIVOS.length - 1];
-  if(!ref) return true; // aún no hay datos de ningún mes
-  return MESES.indexOf(mes) > MESES.indexOf(ref);
+  const ultimoActivo = MESES_ACTIVOS[MESES_ACTIVOS.length - 1];
+  if(!ultimoActivo) return true; // aún no hay datos de ningún mes
+  return MESES.indexOf(mes) > MESES.indexOf(ultimoActivo);
 }
 
 // Nuevo formato: imp = número (total importaciones), docs[key] = número cargadas o null
@@ -625,85 +637,189 @@ function resImportados(emp, mes){
   return all;
 }
 
-// Convierte valor de doc a fracción [cargados, esperados] según formato
+// Convierte valor de doc a fracción [ok, total] según formato
 function docFrac(v, impTotal){
   if(v===null||v===undefined) return null; // no aplica
-  // Nuevo: n cargados de impTotal esperados. Se acota a impTotal para que un
-  // dedazo en la planilla (9 documentos para 3 retiros) no empuje el
-  // porcentaje por encima de 100 ni desborde el arco del donut.
-  if(typeof v === "number") return [Math.min(v, impTotal), impTotal];
+  if(typeof v === "number") return [v, impTotal]; // nuevo: n/total
   if(v===true)  return [1,1]; // viejo: completo
   if(v===false) return [0,1]; // viejo: falta
   return null;
 }
 
-// ── NÚCLEO DE CÁLCULO ───────────────────────────────────────
-// Único bucle de agregación del visor. Recorre los residuos importados por
-// `emps` durante `meses` y acumula [cargados, esperados] de los documentos
-// `docs`. Todas las métricas de abajo son envoltorios de una línea sobre esta
-// función: la fórmula vive en un solo lugar.
-function acumDocs_(emps, meses, docs){
+// % general: todos los docs de residuos importados ese mes
+function pctMensual(emp, mes){
+  if(esFuturo(mes)) return null;
+  const res = resImportados(emp, mes);
+  if(res.length===0) return null;
   let ok=0, tot=0;
-  emps.forEach(emp=>{
-    meses.forEach(mes=>{
-      resImportados(emp, mes).forEach(r=>{
-        const imp = esNuevoFormato(r) ? r.imp : 1;
-        docs.forEach(doc=>{
-          const f = docFrac(r.docs[doc], imp);
-          if(!f) return;           // documento que no aplica: no suma ni resta
-          tot += f[1]; ok += f[0];
-        });
-      });
+  res.forEach(r=>{
+    const imp = esNuevoFormato(r) ? r.imp : 1;
+    DOCS_RES.forEach(doc=>{
+      const f = docFrac(r.docs[doc], imp);
+      if(!f) return;
+      tot+=f[1]; ok+=f[0];
     });
   });
-  return tot===0 ? null : Math.round(ok/tot*100);
+  return tot===0?0:Math.round(ok/tot*100);
 }
 
-// Meses de MESES_ACTIVOS desde Enero hasta `hastaMes` inclusive.
-function mesesHasta_(hastaMes){
-  const idx = MESES.indexOf(hastaMes);
-  return MESES_ACTIVOS.filter(m => MESES.indexOf(m) <= idx);
+// % trazabilidad documental clave
+// % visible (excluye Ingreso/Costo) — usado en tablas de vista mensual
+const DOCS_VISTA = ["Cert. tratamiento","Factura","Cert. declaración","Transportista","Disposición final"];
+function pctResiduoVista(r){
+  const imp = esNuevoFormato(r) ? r.imp : 1;
+  let ok=0, tot=0;
+  DOCS_VISTA.forEach(doc=>{
+    const f = docFrac(r.docs[doc], imp);
+    if(!f) return;
+    tot+=f[1]; ok+=f[0];
+  });
+  return tot===0?null:Math.round(ok/tot*100);
 }
 
-// ── MÉTRICAS ────────────────────────────────────────────────
-// TRAZABILIDAD = guía de despacho + certificado de disposición final.
-// Define el cumplimiento del objetivo "100% Trazabilidad".
-//
-// El hecho de haber importado NO suma. Antes se hacía `ok+=imp; tot+=imp`, es
-// decir se agregaba un término que vale 100% por construcción: un residuo sin
-// un solo documento cargado puntuaba 33% en vez de 0%, y con la mitad de las
-// guías daba 67% en vez de 50%. El indicador tenía piso 33 en lugar de 0.
+function pctTrazo(emp, mes){
+  if(esFuturo(mes)) return null;
+  const res = resImportados(emp, mes);
+  if(res.length===0) return null;
+  let ok=0, tot=0;
+  res.forEach(r=>{
+    const imp = esNuevoFormato(r) ? r.imp : 1;
+    ["Cert. tratamiento","Cert. declaración"].forEach(doc=>{
+      const f = docFrac(r.docs[doc], imp);
+      if(!f) return;
+      tot+=f[1]; ok+=f[0];
+    });
+    tot+=imp; ok+=imp; // importaciones: siempre completo
+  });
+  return tot===0?0:Math.round(ok/tot*100);
+}
+
+function pctAnual(emp){
+  const meses = MESES_ACTIVOS.filter(m=>!esFuturo(m));
+  let ok=0,tot=0;
+  Object.keys(emp.anual).forEach(f=>{
+    meses.forEach(m=>{
+      const v = emp.anual[f][m];
+      if(v===null||v===undefined) return;
+      tot++; if(v===true) ok++;
+    });
+  });
+  return tot===0?0:Math.round(ok/tot*100);
+}
+
+// % trazabilidad documental clave — acumulado anual (alcance del cliente)
+function pctTrazoAnual(emp){
+  let ok=0, tot=0;
+  MESES_ACTIVOS.filter(m=>!esFuturo(m)).forEach(m=>{
+    const res = resImportados(emp, m);
+    res.forEach(r=>{
+      const imp = esNuevoFormato(r) ? r.imp : 1;
+      ["Cert. tratamiento","Cert. declaración"].forEach(doc=>{
+        const f = docFrac(r.docs[doc], imp);
+        if(!f) return;
+        tot+=f[1]; ok+=f[0];
+      });
+      tot+=imp; ok+=imp;
+    });
+  });
+  return tot===0?null:Math.round(ok/tot*100);
+}
+
+// % TRAZABILIDAD REAL — solo Importaciones + Transportista + Disposición final
+// Esta es la métrica que define el cumplimiento del objetivo "100% Trazabilidad"
 function pctTrazabilidadMes(emp, mes){
   if(esFuturo(mes)) return null;
-  if(resImportados(emp, mes).length===0) return null;
-  return acumDocs_([emp], [mes], DOCS_TRAZO_COLS);
+  const res = resImportados(emp, mes);
+  if(res.length===0) return null;
+  let ok=0, tot=0;
+  res.forEach(r=>{
+    const imp = esNuevoFormato(r) ? r.imp : 1;
+    // Importaciones: siempre completo si el residuo fue importado
+    ok += imp; tot += imp;
+    // Transportista
+    const tr = docFrac(r.docs["Transportista"], imp);
+    if(tr){ tot+=tr[1]; ok+=tr[0]; }
+    // Disposición final
+    const df = docFrac(r.docs["Disposición final"], imp);
+    if(df){ tot+=df[1]; ok+=df[0]; }
+  });
+  return tot===0?null:Math.round(ok/tot*100);
 }
 
-// Acumulado Enero → hastaMes de una sucursal.
+// % TRAZABILIDAD hasta un mes específico (inclusive)
+function pctTrazabilidadHastaMes(emp, hastaM){
+  const idx = MESES.indexOf(hastaM);
+  const meses = MESES.slice(0, idx+1).filter(m=>!esFuturo(m));
+  let ok=0, tot=0;
+  meses.forEach(m=>{
+    const res = resImportados(emp, m);
+    res.forEach(r=>{
+      const imp = esNuevoFormato(r) ? r.imp : 1;
+      ok += imp; tot += imp;
+      const tr = docFrac(r.docs["Transportista"], imp);
+      if(tr){ tot+=tr[1]; ok+=tr[0]; }
+      const df = docFrac(r.docs["Disposición final"], imp);
+      if(df){ tot+=df[1]; ok+=df[0]; }
+    });
+  });
+  return tot===0?null:Math.round(ok/tot*100);
+}
+
+// % TRAZABILIDAD ANUAL acumulado
 function pctTrazabilidadAnual(emp, hastaMes){
-  return acumDocs_([emp], mesesHasta_(hastaMes || mesActual), DOCS_TRAZO_COLS);
+  hastaMes = hastaMes || mesActual;
+  const idxHasta = MESES.indexOf(hastaMes);
+  const meses = MESES_ACTIVOS.filter(m=>MESES.indexOf(m) <= idxHasta);
+  let ok=0, tot=0;
+  meses.forEach(m=>{
+    const res = resImportados(emp, m);
+    res.forEach(r=>{
+      const imp = esNuevoFormato(r) ? r.imp : 1;
+      ok += imp; tot += imp;
+      const tr = docFrac(r.docs["Transportista"], imp);
+      if(tr){ tot+=tr[1]; ok+=tr[0]; }
+      const df = docFrac(r.docs["Disposición final"], imp);
+      if(df){ tot+=df[1]; ok+=df[0]; }
+    });
+  });
+  return tot===0?null:Math.round(ok/tot*100);
 }
 
-// Acumulado Enero → hastaMes de TODAS las sucursales de la empresa.
-function pctTrazabilidadEmpresaTotal_(hastaMes){
-  return acumDocs_(EMPRESAS, mesesHasta_(hastaMes), DOCS_TRAZO_COLS);
-}
-
-// DOCUMENTOS = cert. tratamiento + factura + declaración SINADER.
+// % DOCUMENTOS — solo cert. tratamiento + factura + declaración SINADER
 function pctDocumentosMes(emp, mes){
   if(esFuturo(mes)) return null;
-  if(resImportados(emp, mes).length===0) return null;
-  return acumDocs_([emp], [mes], DOCS_DOC_COLS);
+  const res = resImportados(emp, mes);
+  if(res.length===0) return null;
+  let ok=0, tot=0;
+  res.forEach(r=>{
+    const imp = esNuevoFormato(r) ? r.imp : 1;
+    ["Cert. tratamiento","Factura","Cert. declaración"].forEach(doc=>{
+      const f = docFrac(r.docs[doc], imp);
+      if(!f) return;
+      tot+=f[1]; ok+=f[0];
+    });
+  });
+  return tot===0?null:Math.round(ok/tot*100);
 }
 
-// CSE: correos y reuniones de seguimiento. No filtra por esFuturo() — el
-// seguimiento puede registrarse en meses sin operaciones. Cuenta solo los
-// meses con un SI/NO explícito; los vacíos no penalizan.
-function pctCSE(emp){
+// % de carga de un residuo específico ese mes (todos sus docs)
+function pctResiduo(r){
+  const imp = esNuevoFormato(r) ? r.imp : 1;
   let ok=0, tot=0;
-  MESES.forEach(m=>{
-    ["correo","reunion"].forEach(k=>{
-      const v = emp.cse?.[k]?.[m];
+  DOCS_RES.forEach(doc=>{
+    const f = docFrac(r.docs[doc], imp);
+    if(!f) return;
+    tot+=f[1]; ok+=f[0];
+  });
+  return tot===0?null:Math.round(ok/tot*100);
+}
+
+function pctCSE(emp){
+  const keys=["correo","reunion","encuesta"];
+  let ok=0,tot=0;
+  MESES_ACTIVOS.filter(m=>!esFuturo(m)).forEach(m=>{
+    keys.forEach(k=>{
+      const v=emp.cse[k][m];
       if(v===null||v===undefined) return;
       tot++; if(v===true) ok++;
     });
@@ -736,12 +852,11 @@ function cellA(v, mes){
   return `<span class="cell-na2">—</span>`; // null = no aplica
 }
 
-// El CSE se pinta según el valor registrado, no según esFuturo(): el
-// seguimiento puede existir en meses posteriores al último con operaciones.
-function dotCSE(v){
+function dotCSE(v, mes){
+  if(esFuturo(mes)) return `<div class="cse-dot dot-fut">·</div>`;
   if(v===true)  return `<div class="cse-dot dot-ok">✓</div>`;
   if(v===false) return `<div class="cse-dot dot-no">✗</div>`;
-  return `<div class="cse-dot dot-fut">·</div>`;
+  return `<div class="cse-dot dot-na">—</div>`;
 }
 
 // ============================================================
@@ -807,6 +922,15 @@ function donutSVG(pct, color, size=38){
 // SIDEBAR — agrupada por empresa, sucursales colapsables
 // ============================================================
 function renderSidebar(){
+  if(vistaGlobal === "minutas"){
+    document.getElementById("sidebar").innerHTML =
+      `<div class="sb-item" onclick="volverASucursales()" style="cursor:pointer;">
+        <span style="font-size:13px;">←</span>
+        <span class="sb-info"><span class="sb-name">Volver a sucursales</span></span>
+      </div>
+      <div class="sb-divider"></div>` + mnSidebarHtml();
+    return;
+  }
   const color   = EMPRESA_COLOR;
   const colorBg = EMPRESA_COLOR_L;
   const topEl   = document.getElementById("topEmpresa");
@@ -834,7 +958,7 @@ function renderSidebar(){
     <div style="display:grid;grid-template-columns:1fr auto auto;gap:0;padding:6px 14px 4px;border-bottom:1px solid var(--bd);background:var(--g50);">
       <span style="font-size:9px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;">Sucursal</span>
       <span style="font-size:9px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.5px;text-align:center;min-width:40px;">Traz.</span>
-      <span style="font-size:9px;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.5px;text-align:center;min-width:44px;">Val.</span>
+      <span style="font-size:9px;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.5px;text-align:center;min-width:44px;">Obj.</span>
     </div>`;
 
   html += EMPRESAS.map(emp=>{
@@ -846,13 +970,11 @@ function renderSidebar(){
     // Cualquier valor menor con datos cargados = rojo (no un degradado por rango).
     const tCol    = tieneOp ? ((trazo??0)>=100 ? 'var(--ok)' : 'var(--err)') : 'var(--err)';
 
-    // Valorización acumulada: SOLO dato real del Sheet, sin promedio de respaldo
-    const vd      = VAL_DATA[emp.id];
-    const acumOrdenados = MESES.filter(m=>vd?.acumulado?.[m]!=null);
-    const ultimoAcum = acumOrdenados.filter(m=>MESES.indexOf(m)<=mi).slice(-1)[0];
-    const pValAc  = ultimoAcum!==undefined ? vd.acumulado[ultimoAcum] : null;
-    const metaV   = getMetaMes(emp.id, mesActual);
-    const vCol    = pValAc===null?'var(--g300)':metaV?pValAc>=metaV?'var(--ok)':pValAc>=metaV*.7?'var(--warn)':'var(--err)':colorPct(pValAc);
+    // Cumplimiento de objetivos (Objetivos 2026), Enero → mes seleccionado
+    const evObj    = estadoObjetivosVisibles(emp, mesActual);
+    const objOk    = evObj.filter(o=>o.ok).length;
+    const objTot   = evObj.length;
+    const objCol   = objTot===0?'var(--g300)':objOk>=objTot?'var(--ok)':objOk>=objTot*.5?'var(--warn)':'var(--err)';
 
     return `<div class="sb-suc ${act?'active':''}" onclick="setEmp('${emp.id}')" style="display:grid;grid-template-columns:1fr auto auto;gap:4px;align-items:center;padding:7px 14px;">
       <div class="sb-suc-name" style="font-size:11px;font-weight:${act?700:500};color:${act?color:'var(--g700)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${emp.sucursal}</div>
@@ -864,9 +986,9 @@ function renderSidebar(){
             : '<span style="font-size:12px;font-weight:700;color:var(--err);">✗</span>'}
       </div>
       <div style="text-align:center;min-width:44px;">
-        ${pValAc===null
+        ${objTot===0
           ? '<span style="font-size:10px;color:var(--g300);">—</span>'
-          : '<span style="font-size:11px;font-weight:700;color:'+vCol+';">'+pValAc+'%</span>'}
+          : '<span style="font-size:11px;font-weight:700;color:'+objCol+';">'+objOk+'/'+objTot+'</span>'}
       </div>
     </div>`;
   }).join("");
@@ -888,6 +1010,9 @@ function renderKPIs(emp){
   const pMes      = pctDocumentosMes(emp, mesActual); // solo cert+fac+decl
   const pTrazoMes = pctTrazabilidadMes(emp, mesActual);  // ← solo imp+transp+disp
   const pTrazoAnu = pctTrazabilidadAnual(emp);            // ← solo imp+transp+disp
+  const pDocsMes  = pctDocumentosMes(emp, mesActual);     // ← cert+fac+decl
+  const pAnual    = pctAnual(emp);
+  const pCse      = pctCSE(emp);
   const res       = resImportados(emp, mesActual);
   const mesesEval = MESES_ACTIVOS.filter(m=>!esFuturo(m));
   const ultimoMes = mesesEval[mesesEval.length-1] || mesActual;
@@ -1180,16 +1305,20 @@ function renderCSE(emp, modo){
   const keys = [{key:"correo",lbl:"Correo de seguimiento"},{key:"reunion",lbl:"Reunión de seguimiento"}];
   const meses = MESES; // todos los meses Ene-Dic, futuros como ·
 
-  // % solo sobre correo y reunión — misma fórmula que pctCSE()
-  const pCse = pctCSE(emp);
-
-  // Un mes se ve gris si no tiene ningún registro de CSE (ni SI ni NO)
-  const sinRegistro = m => keys.every(({key}) => emp.cse?.[key]?.[m] === undefined
-                                              || emp.cse?.[key]?.[m] === null);
+  // % solo sobre correo y reunión
+  let ok=0, tot=0;
+  MESES_ACTIVOS.filter(m=>!esFuturo(m)).forEach(m=>{
+    keys.forEach(({key})=>{
+      const v=emp.cse[key][m];
+      if(v===null||v===undefined) return;
+      tot++; if(v===true) ok++;
+    });
+  });
+  const pCse = tot===0?0:Math.round(ok/tot*100);
 
   // Tabla compacta: una fila de meses como encabezado, una fila por acción
   const thMeses = meses.map(m=>
-    `<th style="text-align:center;padding:4px 6px;font-size:9px;font-weight:700;color:${sinRegistro(m)?'var(--g300)':m===mesActual?'var(--brand)':'var(--g400)'};white-space:nowrap;min-width:28px;">${m.slice(0,3)}</th>`
+    `<th style="text-align:center;padding:4px 6px;font-size:9px;font-weight:700;color:${esFuturo(m)?'var(--g300)':m===mesActual?'var(--brand)':'var(--g400)'};white-space:nowrap;min-width:28px;">${m.slice(0,3)}</th>`
   ).join("");
 
   return `
@@ -1216,7 +1345,7 @@ function renderCSE(emp, modo){
             ${keys.map(({key,lbl},i)=>`
               <tr style="${i%2===0?'':'background:var(--g25)'}">
                 <td style="padding:8px 16px;font-size:11px;font-weight:700;color:var(--g700);white-space:nowrap;">${lbl}</td>
-                ${meses.map(m=>`<td style="text-align:center;padding:6px 4px;">${dotCSE(emp.cse?.[key]?.[m])}</td>`).join("")}
+                ${meses.map(m=>`<td style="text-align:center;padding:6px 4px;">${dotCSE(emp.cse[key][m],m)}</td>`).join("")}
               </tr>`).join("")}
           </tbody>
         </table>
@@ -1229,10 +1358,8 @@ function renderCSE(emp, modo){
 // ============================================================
 function renderAnual(emp){
   const meses = MESES;
-  // Antes había aquí un esFuturoAnual() local, relativo al mes seleccionado,
-  // que contradecía al esFuturo() global: el mismo mes salía "·" en esta tabla
-  // y con datos reales en la de CSE. Una sola definición para todo el visor.
-  const esFuturoAnual = esFuturo;
+  const _mesIdx = MESES.indexOf(mesActual);
+  function esFuturoAnual(m){ return MESES.indexOf(m) > _mesIdx; }
   const pTrazo = pctTrazabilidadAnual(emp)??0;
   const pDocs  = (()=>{
     const ms=meses.filter(m=>!esFuturoAnual(m));
@@ -1396,43 +1523,83 @@ function renderAnual(emp){
 // VISTA OBJETIVOS
 // ============================================================
 // % Trazabilidad de TODA la empresa (suma de todas las sucursales), hasta un mes dado
-// ¿Objetivo cumplido? Los objetivos de trazabilidad llegan sin `ok` desde el
-// Apps Script porque su avance se calcula acá desde los datos; el resto sí lo trae.
-function objetivoCumplido_(o, hastaMes){
-  if(/trazabilidad/i.test(o.texto)){
-    const av = pctTrazabilidadEmpresaTotal_(hastaMes);
-    return av !== null && av >= 100;
-  }
-  return o.ok === true;
+function pctTrazabilidadEmpresaTotal_(hastaMes){
+  const idxHasta = MESES.indexOf(hastaMes);
+  const meses = MESES_ACTIVOS.filter(m=>MESES.indexOf(m) <= idxHasta);
+  let ok=0, tot=0;
+  EMPRESAS.forEach(e=>{
+    meses.forEach(m=>{
+      resImportados(e, m).forEach(r=>{
+        const imp = esNuevoFormato(r) ? r.imp : 1;
+        ok += imp; tot += imp;
+        const tr = docFrac(r.docs["Transportista"], imp);
+        if(tr){ tot+=tr[1]; ok+=tr[0]; }
+        const df = docFrac(r.docs["Disposición final"], imp);
+        if(df){ tot+=df[1]; ok+=df[0]; }
+      });
+    });
+  });
+  return tot===0?null:Math.round(ok/tot*100);
+}
+
+// Calcula el estado real y visible de los objetivos de una obra:
+// - Excluye del todo cualquier objetivo sintético de Valorización (las cards
+//   "X% Valorización" / "Meta Valorización (sin definir)" que arma el Apps
+//   Script aparte de los 7 de "Objetivos 2026").
+// - Trazabilidad se recalcula en vivo con los datos reales.
+// - "Registrar operaciones en forma unitaria" se da por cumplido salvo que
+//   la planilla traiga explícitamente ok=false.
+// - Usa comparación estricta de booleano para o.ok (no !==undefined), porque
+//   la planilla puede traer null (sin dato) y eso NO es lo mismo que false.
+function estadoObjetivosVisibles(emp, mesActualParam){
+  const esValorizacionSintetica = t => /^meta valorizaci[oó]n\b/i.test(t) || /^\d+(\.\d+)?%\s*valorizaci[oó]n/i.test(t);
+
+  return emp.objetivos
+    .filter(o => !esValorizacionSintetica(o.texto))
+    .map(o => {
+      const esTrazabilidad = /trazabilidad/i.test(o.texto);
+      const esOperacionUnitaria = /operaciones? en forma unitaria/i.test(o.texto);
+
+      let avance, metaNum, detalle, ambito, ok;
+      if (esTrazabilidad) {
+        // Trazabilidad de ESTA obra puntual, Enero → mes seleccionado.
+        // (pctTrazabilidadEmpresaTotal_ sumaría TODAS las sucursales de
+        // Socovesa juntas, lo que diluye los problemas de una obra puntual —
+        // por eso NO se usa acá.)
+        avance = pctTrazabilidadHastaMes(emp, mesActualParam);
+        metaNum = 100;
+        detalle = "Importaciones + Transportista + Disposición final de esta obra";
+        ambito = emp.sucursal || "esta obra";
+        ok = avance !== null && avance >= metaNum;
+      } else if (esOperacionUnitaria) {
+        avance = (o.avance ?? o.pct ?? 100);
+        metaNum = (o.meta ?? 100);
+        detalle = o.detalle || "Las operaciones de esta obra se registran de forma unitaria";
+        ambito = emp.sucursal || "esta obra";
+        ok = (o.ok === false) ? false : true; // cumplido por defecto salvo dato explícito en contra
+      } else {
+        avance = (o.avance ?? o.pct ?? null);
+        metaNum = (o.meta ?? 100);
+        detalle = o.detalle || "";
+        ambito = emp.sucursal || "esta obra";
+        const sinDatoTmp = avance===null || avance===undefined || isNaN(avance);
+        ok = sinDatoTmp ? false : (typeof o.ok === "boolean" ? o.ok : avance >= metaNum);
+      }
+
+      const sinDato = avance===null || avance===undefined || isNaN(avance);
+      return { texto: o.texto, avance, metaNum, detalle, ambito, ok, sinDato };
+    });
 }
 
 function renderObjetivos(emp){
   if(emp.objetivos.length===0) return `<div class="empty">Sin objetivos registrados para esta empresa.</div>`;
 
+  // % real de trazabilidad anual calculado de los datos
+  const pTrazoAnual = pctAnual(emp);
   // Rango evaluado: SIEMPRE Enero hasta el mes seleccionado en el visor
   const mesesConDatos = MESES_ACTIVOS.filter(m=>MESES.indexOf(m) <= MESES.indexOf(mesActual));
 
-  // Valorización: % de TODAS las sucursales de la empresa que cumplen o superan
-  // su propia meta, con el acumulado real hasta el mes seleccionado. Es un
-  // indicador global de la empresa, no de la sucursal que estés viendo.
-  function acumuladoHasta_(vd, hastaMes){
-    if(!vd) return null;
-    const ms = MESES.slice(0, MESES.indexOf(hastaMes)+1).filter(m=>vd.acumulado?.[m]!=null);
-    const u = ms[ms.length-1];
-    return u!==undefined ? vd.acumulado[u] : null;
-  }
-  let cumplen=0, evaluables=0;
-  EMPRESAS.forEach(e=>{
-    const vd = VAL_DATA[e.id];
-    const meta = getMetaMes(e.id, mesActual);
-    if(meta==null) return;
-    const ac = acumuladoHasta_(vd, mesActual);
-    if(ac===null) return;
-    evaluables++;
-    if(ac>=meta) cumplen++;
-  });
-  const pctCumplimiento = evaluables>0 ? Math.round(cumplen/evaluables*100) : null;
-  const colCump = pctCumplimiento===null?'var(--g300)':pctCumplimiento>=100?'#039855':pctCumplimiento>=70?'#F79009':'#F04438';
+  const objetivosVisibles = estadoObjetivosVisibles(emp, mesActual);
 
   return `
     <div class="card">
@@ -1441,50 +1608,25 @@ function renderObjetivos(emp){
         <div class="card-sub">Enero → ${mesActual} · ${mesesConDatos.length} meses evaluados</div>
       </div>
       <div class="obj-grid">
-        ${emp.objetivos.map(o=>{
-          const esTrazabilidad = /trazabilidad/i.test(o.texto);
-          if(!esTrazabilidad) return ""; // la de Valorización se reemplaza por la tarjeta agregada de abajo
-
-          const avance = pctTrazabilidadEmpresaTotal_(mesActual);
-          const metaNum = 100;
-          const pctBarra = Math.min(Math.round(avance / metaNum * 100), 100);
-          const ok = avance >= metaNum;
-          const col = ok ? '#039855' : (avance >= metaNum*0.7 ? '#F79009' : '#F04438');
+        ${objetivosVisibles.map(o=>{
+          const col = o.sinDato ? 'var(--g300)' : (o.ok ? '#039855' : (o.avance >= o.metaNum*0.7 ? '#F79009' : '#F04438'));
+          const pctBarra = o.sinDato ? 0 : Math.min(Math.round(o.avance / o.metaNum * 100), 100);
 
           return `<div class="obj-item">
             <div class="obj-text">
               ${o.texto}
-              <span style="font-size:10px;font-weight:500;color:var(--g400);margin-left:6px;">Ene–${mesActual.slice(0,3)} · toda la empresa</span>
+              <span style="font-size:10px;font-weight:500;color:var(--g400);margin-left:6px;">Ene–${mesActual.slice(0,3)} · ${o.ambito}</span>
             </div>
             <div class="obj-prog">
               <div class="prog-bg" style="flex:1">
                 <div class="prog-fill" style="width:${pctBarra}%;background:${col}"></div>
               </div>
-              <span class="prog-lbl" style="color:${col};min-width:42px;text-align:right">${avance===null?"—":avance+"%"}</span>
-              ${ok?`<span class="badge b-ok">✓</span>`:`<span class="badge b-falta">✗</span>`}
+              <span class="prog-lbl" style="color:${col};min-width:42px;text-align:right">${o.sinDato?"—":o.avance+"%"}</span>
+              ${o.sinDato?"":o.ok?`<span class="badge b-ok">✓</span>`:`<span class="badge b-falta">✗</span>`}
             </div>
-            <div style="font-size:10px;color:var(--g400);margin-top:5px;">Suma de documentos reales de todas las sucursales</div>
+            <div style="font-size:10px;color:var(--g400);margin-top:5px;">${o.sinDato?"Sin dato registrado aún para esta obra":o.detalle}</div>
           </div>`;
         }).join("")}
-
-        <div class="obj-item">
-          <div class="obj-text">
-            Valorización
-            <span style="font-size:10px;font-weight:500;color:var(--g400);margin-left:6px;">Ene–${mesActual.slice(0,3)} · toda la empresa</span>
-          </div>
-          <div class="obj-prog">
-            <div class="prog-bg" style="flex:1">
-              <div class="prog-fill" style="width:${pctCumplimiento??0}%;background:${colCump}"></div>
-            </div>
-            <span class="prog-lbl" style="color:${colCump};min-width:42px;text-align:right">${pctCumplimiento===null?"—":pctCumplimiento+"%"}</span>
-            ${pctCumplimiento===null?"":pctCumplimiento>=100?`<span class="badge b-ok">✓</span>`:`<span class="badge b-falta">✗</span>`}
-          </div>
-          <div style="font-size:10px;color:var(--g400);margin-top:5px;">
-            ${evaluables===0
-              ? "Aún no hay meta Y % Acumulado cargados juntos en ninguna sucursal (revisa la hoja Valorización)"
-              : `${cumplen} de ${evaluables} sucursales cumplen o superan su meta de valorización acumulada`}
-          </div>
-        </div>
       </div>
     </div>`;
 }
@@ -1517,43 +1659,6 @@ function renderValorizacion(emp){
   const mAct    = getMetaMes(emp.id,mesActual);
   const metasV  = pasados.map(m=>getMetaMes(emp.id,m)).filter(v=>v!=null);
   const promM   = metasV.length?metasV.reduce((a,b)=>a+b)/metasV.length:null;
-
-  // ── Banner de brecha vs meta ────────────────────────────────────────────
-  // El objetivo de valorización se cumple o no se cumple: con meta 5% y
-  // acumulado 3% la pestaña Objetivos muestra 0%. Acá traducimos eso a avance
-  // parcial: cuántos puntos faltan y qué % de la meta representan.
-  // Se compara acumulado real vs meta DEL MES (mismo criterio que la tarjeta
-  // de Objetivos), no vs promM — ese es el promedio de metas del año.
-  const brechaPts   = (prom!=null && mAct!=null) ? Math.round((mAct-prom)*10)/10 : null;
-  const avanceMeta  = (prom!=null && mAct!=null && mAct>0) ? Math.round(prom/mAct*100) : null;
-  const promTxt     = prom!=null ? Math.round(prom*10)/10 : null;
-  // Si el Sheet aún no tiene el mes elegido, `prom` viene de un mes anterior:
-  // hay que decirlo o el banner afirma una brecha con datos viejos.
-  const acumViejo   = prom!=null && ultimoMesAcumDetalle!==mesActual
-                      ? ` · acumulado a ${ultimoMesAcumDetalle}` : "";
-  let bannerBrecha;
-  if(mAct==null){
-    bannerBrecha = `<div class="val-gap val-gap-na">
-      <div class="val-gap-t">Sin meta cargada</div>
-      <div class="val-gap-d">El Sheet no tiene meta para ${mesActual} ni para ningún mes anterior, así que no se puede evaluar cumplimiento.</div>
-    </div>`;
-  } else if(prom==null){
-    bannerBrecha = `<div class="val-gap val-gap-na">
-      <div class="val-gap-t">Meta ${mAct}% · sin % acumulado aún</div>
-      <div class="val-gap-d">La fila "% Acumulado" del Sheet todavía no tiene datos hasta ${mesActual}.</div>
-    </div>`;
-  } else if(brechaPts<=0){
-    bannerBrecha = `<div class="val-gap val-gap-ok">
-      <div class="val-gap-t">✓ Meta cumplida — ${promTxt}% acumulado sobre meta ${mAct}%</div>
-      <div class="val-gap-d">${brechaPts===0?"Justo en la meta":Math.abs(brechaPts)+" pts sobre la meta"}${acumViejo}</div>
-    </div>`;
-  } else {
-    bannerBrecha = `<div class="val-gap ${avanceMeta>=70?"val-gap-warn":"val-gap-err"}">
-      <div class="val-gap-t">Falta ${100-avanceMeta}% para cumplir la meta</div>
-      <div class="val-gap-d">${promTxt}% acumulado de ${mAct}% · ${avanceMeta}% de avance · faltan ${brechaPts} pts de valorización${acumViejo}</div>
-      <div class="val-gap-n">El objetivo se marca cumplido solo al 100%.</div>
-    </div>`;
-  }
 
   // % Acumulado real (dato del Sheet) por mes; SOLO si ese mes ya tiene el dato cargado
   function acum(mi){
@@ -1595,7 +1700,6 @@ function renderValorizacion(emp){
         <div class="kpi-desc">\u00faltimo vs anterior</div>
       </div>
     </div>
-    ${bannerBrecha}
     <div class="card">
       <div class="card-header">
         <div>
@@ -1649,6 +1753,7 @@ function renderValorizacion(emp){
 // RENDER PRINCIPAL
 // ============================================================
 function renderMain(){
+  if(vistaGlobal === "minutas"){ mnRenderMain(); return; }
   const emp = EMPRESAS.find(e=>e.id===empActual);
   const d = emp.mensual[mesActual];
   // Pendientes = solo trazabilidad incompleta
@@ -1709,7 +1814,7 @@ function renderMain(){
     <div class="vtabs">
       <button class="vtab ${vistaActual==='obj'?'active':''}" onclick="setVista('obj')">
         🎯 Objetivos
-        ${emp.objetivos.length>0?`<span class="vtab-badge">${emp.objetivos.filter(o=>objetivoCumplido_(o,mesActual)).length}/${emp.objetivos.length}</span>`:''}
+        ${emp.objetivos.length>0?(()=>{const ev=estadoObjetivosVisibles(emp, mesActual);return `<span class="vtab-badge">${ev.filter(o=>o.ok).length}/${ev.length}</span>`;})():''}
       </button>
       <button class="vtab ${vistaActual==='mensual'?'active':''}" onclick="setVista('mensual')">
         📋 Mensual detallado
@@ -1956,9 +2061,9 @@ function imprimirInformeCompleto(){
       return '<tr class="'+(i%2?'even':'')+'">'
         +'<td style="padding:5px 8px;border-bottom:1px solid #F2F4F7;font-weight:600;">'+lbl+'</td>'
         +MESES.map(m=>{
-          // Igual que dotCSE(): se pinta el valor registrado, no esFuturo()
-          const v=emp.cse?.[key]?.[m];
-          return '<td style="padding:4px 3px;text-align:center;border-bottom:1px solid #F2F4F7;">'+(v===true?'<span style="color:#039855;font-weight:700;">✓</span>':v===false?'<span style="color:#F04438;font-weight:700;">✗</span>':'<span style="color:#D0D5DD;">·</span>')+'</td>';
+          if(esFuturo(m)) return '<td class="mc" style="border-bottom:1px solid #F2F4F7;color:#D0D5DD;">·</td>';
+          const v=emp.cse[key][m];
+          return '<td style="padding:4px 3px;text-align:center;border-bottom:1px solid #F2F4F7;">'+(v===true?'<span style="color:#039855;font-weight:700;">✓</span>':v===false?'<span style="color:#F04438;font-weight:700;">✗</span>':'<span style="color:#98A2B3;">—</span>')+'</td>';
         }).join('')
         +'</tr>';
     }).join('')
@@ -2033,7 +2138,7 @@ function setEmpDesdeSelect(id){
 // ============================================================
 // EVENTOS
 // ============================================================
-function setEmp(id){ empActual=id; filtroActual="todos"; vistaActual="mensual"; renderSidebar(); renderMain(); buildSucursalSelect(); }
+function setEmp(id){ empActual=id; filtroActual="todos"; vistaActual="mensual"; vistaGlobal="empresa"; renderSidebar(); renderMain(); buildSucursalSelect(); mnUpdateAccessBtn(); }
 function setVista(v){  vistaActual=v; renderMain(); }
 function setFiltro(f){ filtroActual=f; renderMain(); }
 function setMes(m){    mesActual=m;   filtroActual="todos"; renderSidebar(); renderMain(); }
@@ -2076,9 +2181,6 @@ function renderClBody(){
     const acumOrd = MESES.filter(m=>vd?.acumulado?.[m]!=null && MESES.indexOf(m)<=mi);
     const ultimoAcumCl = acumOrd.slice(-1)[0];
     const pValAc  = ultimoAcumCl!==undefined ? vd.acumulado[ultimoAcumCl] : null;
-    // ¿El acumulado que estamos mostrando es el del mes seleccionado, o venimos
-    // arrastrando el de un mes anterior porque el Sheet aún no tiene este mes?
-    const tieneActual = vd?.acumulado?.[mesActual] != null;
     const metaV   = getMetaMes(emp.id, mesActual);
     const colV    = pValAc===null?'var(--g300)':metaV?pValAc>=metaV?'var(--ok)':pValAc>=metaV*.7?'var(--warn)':'var(--err)':colorPct(pValAc);
 
@@ -2166,15 +2268,6 @@ function actualizarSelectorMeses_(){
   ).join("");
 }
 
-// Último mes de MESES_ACTIVOS con al menos un residuo importado en alguna
-// sucursal. Devuelve null si todavía no hay ningún dato de trazabilidad.
-function ultimoMesConResiduos_(){
-  const conDatos = MESES_ACTIVOS.filter(m =>
-    EMPRESAS.some(e => (e.mensual[m]?.residuos || []).length > 0)
-  );
-  return conDatos[conDatos.length - 1] || null;
-}
-
 function cargarDatos(esRefrescoSilencioso){
   if(!esRefrescoSilencioso) mostrarEstadoCarga_("Cargando datos desde Google Sheets…");
 
@@ -2199,17 +2292,8 @@ function cargarDatos(esRefrescoSilencioso){
       : MESES_ACTIVOS;
 
     if(!empActual && EMPRESAS.length) empActual = EMPRESAS[0].id;
-
-    // Horizonte de trazabilidad: se recalcula en cada carga y lo consume esFuturo()
-    ULTIMO_MES_DATOS = ultimoMesConResiduos_();
-
     if(!mesActual || !MESES_ACTIVOS.includes(mesActual)) {
-      // Abrir en el último mes que REALMENTE tiene residuos cargados.
-      // MESES_ACTIVOS puede incluir meses que solo existen en Seguimiento_CSE
-      // o Valorización; abrir ahí mostraría una pantalla vacía.
-      mesActual = ultimoMesConResiduos_()
-                || MESES_ACTIVOS[MESES_ACTIVOS.length - 1]
-                || "Enero";
+      mesActual = MESES_ACTIVOS[MESES_ACTIVOS.length - 1] || "Enero";
     }
 
     actualizarSelectorMeses_();
@@ -2224,11 +2308,7 @@ function cargarDatos(esRefrescoSilencioso){
   };
 
   const scriptTag = document.createElement("script");
-  // Si el link tiene ?suc=<id>, se lo pasamos al Apps Script para que
-  // filtre en el servidor y solo devuelva esa sucursal (links externos).
-  const sucFiltro = new URLSearchParams(window.location.search).get("suc");
-  const sufijoSuc = sucFiltro ? "&suc=" + encodeURIComponent(sucFiltro) : "";
-  scriptTag.src = DATA_SOURCE_URL + "?callback=" + callbackName + sufijoSuc + "&_=" + Date.now();
+  scriptTag.src = DATA_SOURCE_URL + "?visor=1&callback=" + callbackName + "&_=" + Date.now();
   scriptTag.onerror = function(){
     delete window[callbackName];
     mostrarEstadoCarga_("No se pudo contactar la fuente de datos. Reintentando en " + REFRESH_MINUTOS + " min.");
@@ -2252,9 +2332,563 @@ function ocultarEstadoCarga_(){
   if(el) el.style.display = "none";
 }
 
+// ============================================================
+// MINUTAS — integrado desde el Visor de Minutas
+// Fuente: pestaña "Minuta" de la planilla Socovesa (solo informativo — la
+// lectura real va vía Apps Script/JSONP, no directo a Sheets)
+// ============================================================
+const MN_SHEET_ID = "12CDpG9dNUIKtT5tsKGx8JgekHE0_RyWfEx-pba6zvPM"; // planilla "Socovesa"
+const MN_SHEET_NAME = "Minuta"; // pestaña dentro de esa planilla
+const MN_LS_SCRIPT = "visorObjetivosSocovesa.mnScriptUrl.v1";
+const MN_LS_DATA = "visorObjetivosSocovesa.mnData.v1";
+
+let mnSessions = [];      // [{ title, items:[{item, cumplido, comentario, acuerdos, revisado}] }]
+let mnActiveIdx = 0;
+let mnFilter = "todos";
+let mnDirty = false;
+let mnScriptUrl = DATA_SOURCE_URL; // ← mismo Apps Script del visor de objetivos, por defecto
+let mnStatus = { state:"idle", text:"Sin cargar" };
+let mnCfgOpen = false;
+
+function mnEl(id){ return document.getElementById(id); }
+
+function mnShowToast(msg, isErr){
+  const t = mnEl("mnToast");
+  if(!t) return;
+  t.textContent = msg;
+  t.className = "mn-toast show" + (isErr ? " err" : "");
+  clearTimeout(mnShowToast._t);
+  mnShowToast._t = setTimeout(()=> t.className = "mn-toast", 3200);
+}
+function mnSetStatus(state, text){ mnStatus = { state, text }; }
+function mnEscapeHtml(s){ return (s||"").toString().replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+// ---------- CSV parser mínimo ----------
+function mnParseCSV(text){
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for (let i=0; i<text.length; i++){
+    const c = text[i];
+    if (inQuotes){
+      if (c === '"'){ if (text[i+1] === '"'){ field += '"'; i++; } else inQuotes = false; }
+      else field += c;
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === ','){ row.push(field); field=""; }
+      else if (c === '\n'){ row.push(field); rows.push(row); row=[]; field=""; }
+      else if (c === '\r'){}
+      else field += c;
+    }
+  }
+  if (field.length || row.length){ row.push(field); rows.push(row); }
+  return rows;
+}
+function mnIsBlankCell(v){ return v === null || v === undefined || v === ""; }
+function mnNormalize(v){
+  if (v === true) return "true";
+  if (v === false) return "false";
+  return (v || "").toString().trim().toLowerCase();
+}
+function mnIsTrueVal(v){ return mnNormalize(v) === "true" || mnNormalize(v) === "verdadero"; }
+
+// Una fila es "de título" si la columna A tiene algo y el resto (hasta la F)
+// está vacío. Sirve tanto para títulos de texto ("Minuta 4/11/2025", COPEC)
+// como para una fecha pura en la celda (PMS), sin depender del texto.
+function mnIsSessionHeader(row){
+  if (mnIsBlankCell(row[0])) return false;
+  for (let i = 1; i < Math.min(row.length, 6); i++){
+    if (!mnIsBlankCell(row[i])) return false;
+  }
+  return true;
+}
+function mnIsSubHeaderRow(row){
+  const a = mnNormalize(row[0]);
+  return a === "items" || a === "item" || a === "tema";
+}
+function mnIsFullyBlank(row){
+  for (let i = 0; i < Math.min(row.length, 6); i++){
+    if (!mnIsBlankCell(row[i])) return false;
+  }
+  return true;
+}
+// Lee la fila de sub-encabezado (si existe) y detecta en qué columna está
+// cada campo — así el mismo parser sirve para "Items,Cumplimiento,Comentarios"
+// (COPEC, con Acuerdos/Revisado sin etiqueta en D/E) como para
+// "Tema,Revisado,Detalle,Acuerdos,Resuelto" (PMS, con otro orden).
+function mnBuildColMap(subRow){
+  const map = { item:0, cumplido:1, comentario:2, acuerdos:3, revisado:4 }; // fallback posicional
+  if (!subRow) return map;
+  let cumplidoSet = false, revisadoSet = false, resueltoIdx = -1;
+  subRow.forEach((cell, idx) => {
+    const v = mnNormalize(cell);
+    if (v === "item" || v === "items" || v === "tema") map.item = idx;
+    else if (v === "cumplimiento" || v === "cumplido"){ map.cumplido = idx; cumplidoSet = true; }
+    else if (v === "comentario" || v === "comentarios" || v === "detalle") map.comentario = idx;
+    else if (v === "acuerdo" || v === "acuerdos") map.acuerdos = idx;
+    else if (v === "revisado"){ map.revisado = idx; revisadoSet = true; }
+    else if (v === "resuelto") resueltoIdx = idx;
+  });
+  if (resueltoIdx !== -1){
+    if (!cumplidoSet) map.cumplido = resueltoIdx;
+    else if (!revisadoSet) map.revisado = resueltoIdx;
+  }
+  return map;
+}
+// Fechas puras (celda de PMS) llegan como ISO ("2026-07-01T00:00:00.000Z")
+// tras pasar por JSON — se formatean lindo. Títulos de texto (COPEC) quedan igual.
+function mnFormatTitle(raw){
+  if (mnIsBlankCell(raw)) return "";
+  const s = raw.toString();
+  const iso = /^(\d{4})-(\d{2})-(\d{2})T/.exec(s);
+  if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
+  return s.trim();
+}
+function mnRowsToSessions(rows){
+  const out = [];
+  let i = 0;
+  while (i < rows.length){
+    const row = rows[i] || [];
+    if (mnIsSessionHeader(row)){
+      const headerRow = i + 1; // fila real (1-indexed) en el Sheet
+      const title = mnFormatTitle(row[0]);
+      let r = i + 1;
+      let colMap = { item:0, cumplido:1, comentario:2, acuerdos:3, revisado:4 };
+      if (r < rows.length && mnIsSubHeaderRow(rows[r] || [])){
+        colMap = mnBuildColMap(rows[r]);
+        r++;
+      }
+      const dataStartRow = r + 1; // fila real (1-indexed) del primer ítem
+      const items = [];
+      while (r < rows.length){
+        const cur = rows[r] || [];
+        if (mnIsSessionHeader(cur)) break;
+        if (mnIsFullyBlank(cur)){
+          const next = rows[r+1] || [];
+          if (!next.length || mnIsFullyBlank(next) || mnIsSessionHeader(next)) break;
+          r++;
+          continue;
+        }
+        items.push({
+          item: (cur[colMap.item] || "").toString().trim(),
+          cumplido: mnIsTrueVal(cur[colMap.cumplido]),
+          comentario: (cur[colMap.comentario] || "").toString().trim(),
+          acuerdos: (cur[colMap.acuerdos] || "").toString().trim(),
+          revisado: mnIsTrueVal(cur[colMap.revisado])
+        });
+        r++;
+      }
+      out.push({ title: title || `Sesión fila ${headerRow}`, headerRow, dataStartRow, colMap, items });
+      i = r;
+    } else {
+      i++;
+    }
+  }
+  return out;
+}
+
+function mnLoadConfig(){ try{ const raw = localStorage.getItem(MN_LS_SCRIPT); if (raw) mnScriptUrl = raw; }catch(e){} }
+function mnSaveConfig(){ try{ localStorage.setItem(MN_LS_SCRIPT, mnScriptUrl || ""); }catch(e){} }
+function mnLoadCachedData(){ try{ const raw = localStorage.getItem(MN_LS_DATA); if (raw) mnSessions = JSON.parse(raw); }catch(e){} }
+function mnCacheData(){ try{ localStorage.setItem(MN_LS_DATA, JSON.stringify(mnSessions)); }catch(e){} }
+function mnMarkDirty(){ mnDirty = true; mnCacheData(); mnScheduleAutoSave(); }
+
+let mnAutoSaveTimer = null;
+const MN_AUTOSAVE_DELAY_MS = 1500;
+function mnScheduleAutoSave(){
+  clearTimeout(mnAutoSaveTimer);
+  if (!mnScriptUrl){ mnSetStatus("idle", "Cambios sin guardar (sin Apps Script configurado)"); mnUpdateStatusUI(); return; }
+  mnSetStatus("idle", "Cambios sin guardar — se guardará solo…");
+  mnUpdateStatusUI();
+  mnAutoSaveTimer = setTimeout(() => mnSave(true), MN_AUTOSAVE_DELAY_MS);
+}
+
+function mnFetchSheet(silencioso){
+  mnSetStatus("idle", "Cargando…");
+  if(!silencioso) mnShowToast("Actualizando minutas…");
+
+  const callbackName = "__onMinutasRecylink_" + Date.now();
+  window[callbackName] = function(payload){
+    delete window[callbackName];
+    scriptTag.remove();
+
+    if(!payload || payload.error){
+      mnSetStatus("err", "No se pudo leer la hoja de Minutas");
+      if(!silencioso) mnShowToast("No se pudo leer la pestaña 'Minuta'" + (payload && payload.message ? ": " + payload.message : "") + ".", true);
+      return;
+    }
+
+    const prevHeaderRow = mnSessions[mnActiveIdx] ? mnSessions[mnActiveIdx].headerRow : null;
+    mnSessions = mnRowsToSessions(payload.rows || []);
+    const matchIdx = prevHeaderRow ? mnSessions.findIndex(s => s.headerRow === prevHeaderRow) : -1;
+    mnActiveIdx = matchIdx !== -1 ? matchIdx : (mnSessions.length ? mnSessions.length - 1 : 0);
+    mnCacheData();
+    mnDirty = false;
+    mnSetStatus("ok", "Sincronizado " + new Date().toLocaleTimeString());
+    if(!silencioso) mnShowToast(mnSessions.length ? `Se cargaron ${mnSessions.length} minutas.` : "No se reconoció ninguna minuta en la pestaña.");
+    if(vistaGlobal === "minutas"){ renderSidebar(); renderMain(); } else { renderSidebar(); }
+  };
+
+  const scriptTag = document.createElement("script");
+  scriptTag.src = DATA_SOURCE_URL + "?minutas=1&callback=" + callbackName + "&_=" + Date.now();
+  scriptTag.onerror = function(){
+    delete window[callbackName];
+    mnSetStatus("err", "No se pudo contactar el Apps Script");
+    if(!silencioso) mnShowToast("No se pudo contactar el Apps Script para leer las minutas.", true);
+  };
+  document.body.appendChild(scriptTag);
+}
+
+function mnSaveViaHiddenForm(url, jsonString){
+  return new Promise((resolve, reject) => {
+    try {
+      const host = mnEl("mnSaveFrameHost");
+      const frameName = "mnSaveFrame_" + Date.now();
+      const iframe = document.createElement("iframe");
+      iframe.name = frameName;
+      host.appendChild(iframe);
+
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = url;
+      form.target = frameName;
+
+      const input = document.createElement("input");
+      input.type = "hidden";
+      input.name = "payload";
+      input.value = jsonString;
+      form.appendChild(input);
+      host.appendChild(form);
+
+      let settled = false;
+      iframe.addEventListener("load", () => {
+        if (settled) return;
+        settled = true;
+        setTimeout(() => { iframe.remove(); form.remove(); }, 300);
+        resolve();
+      });
+      form.submit();
+      setTimeout(() => { if (!settled){ settled = true; resolve(); } }, 5000);
+    } catch (e){ reject(e); }
+  });
+}
+
+async function mnSave(silencioso){
+  clearTimeout(mnAutoSaveTimer);
+  if (!mnScriptUrl){
+    if(!silencioso){ mnCfgOpen = true; renderMain(); mnShowToast("Pega la URL del Apps Script para poder guardar en el Sheet.", true); }
+    return;
+  }
+  const btn = mnEl("mnSaveBtn");
+  if(btn){ btn.disabled = true; btn.textContent = "Guardando…"; }
+  mnSetStatus("idle", "Guardando…"); mnUpdateStatusUI();
+  const payload = { tipo: "minutas", sheetId: MN_SHEET_ID, sheetName: MN_SHEET_NAME, sessions: mnSessions };
+  let savedOk = false, errorMsg = "";
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 8000);
+    const res = await fetch(mnScriptUrl, {
+      method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    let json;
+    try { json = await res.json(); } catch(e){ throw new Error("Respuesta no-JSON del Apps Script"); }
+    if (json.ok === false) throw new Error(json.error || "Error desconocido");
+    savedOk = true;
+  } catch(err){
+    console.warn("Fetch directo falló, probando formulario oculto:", err);
+    try { await mnSaveViaHiddenForm(mnScriptUrl, JSON.stringify(payload)); savedOk = true; }
+    catch(err2){ console.error(err2); errorMsg = "No se pudo enviar los cambios."; }
+  }
+  if (savedOk){
+    mnDirty = false;
+    if(!silencioso) mnShowToast("Cambios guardados en el Sheet.");
+    mnSetStatus("ok", "Guardado automático " + new Date().toLocaleTimeString());
+  } else {
+    // Reintenta el autoguardado más adelante; no se pierde el cambio, sigue en localStorage.
+    mnShowToast(errorMsg || "No se pudo guardar.", true);
+    mnSetStatus("err", "Error al guardar — reintentando…");
+    if (silencioso) mnAutoSaveTimer = setTimeout(() => mnSave(true), MN_AUTOSAVE_DELAY_MS * 4);
+  }
+  mnUpdateStatusUI();
+}
+
+function mnUpdateStatusUI(){
+  const dot = mnEl("mnStatusDot");
+  const txt = mnEl("mnStatusText");
+  if(dot) dot.className = "mn-status-dot" + (mnStatus.state==='ok'?' ok':mnStatus.state==='err'?' err':'');
+  if(txt) txt.textContent = mnStatus.text;
+  const btn = mnEl("mnSaveBtn");
+  if(btn){ btn.disabled = !mnSessions.length; btn.textContent = "Guardar ahora"; }
+}
+
+function mnExportCSV(){
+  let out = "Minuta,Item,Cumplimiento,Comentario,Acuerdos,Revisado\n";
+  const esc = (s) => `"${(s||"").toString().replace(/"/g,'""')}"`;
+  mnSessions.forEach(sess => sess.items.forEach(it => {
+    out += [esc(sess.title), esc(it.item), it.cumplido?"TRUE":"FALSE", esc(it.comentario), esc(it.acuerdos), it.revisado?"TRUE":"FALSE"].join(",") + "\n";
+  }));
+  const blob = new Blob([out], {type:"text/csv;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "minutas-copec.csv"; a.click();
+  mnShowToast("Exportado como .csv");
+}
+
+function mnExportWord(){
+  if (!mnSessions.length || !mnSessions[mnActiveIdx]){ mnShowToast("No hay minuta seleccionada.", true); return; }
+  const sess = mnSessions[mnActiveIdx];
+  const escW = mnEscapeHtml;
+  const rowsHtml = sess.items.map(it => `
+    <tr>
+      <td style="border:1px solid #999;padding:6px;text-align:center;">${it.revisado ? "✔" : ""}</td>
+      <td style="border:1px solid #999;padding:6px;text-align:center;">${it.cumplido ? "✔" : ""}</td>
+      <td style="border:1px solid #999;padding:6px;">${escW(it.item)}</td>
+      <td style="border:1px solid #999;padding:6px;">${escW(it.comentario)}</td>
+      <td style="border:1px solid #999;padding:6px;">${escW(it.acuerdos)}</td>
+    </tr>
+  `).join("");
+  const total = sess.items.length;
+  const done = sess.items.filter(i=>i.cumplido).length;
+  const reviewed = sess.items.filter(i=>i.revisado).length;
+  const html = `
+    <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+    <head><meta charset="utf-8"><title>${escW(sess.title)}</title>
+    <!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View></w:WordDocument></xml><![endif]--></head>
+    <body style="font-family:Calibri, Arial, sans-serif; font-size:12pt;">
+      <h1 style="font-size:18pt;margin-bottom:2px;">Recylink — ${EMPRESA_NOMBRE} · Minutas</h1>
+      <h2 style="font-size:14pt;color:#0069A6;margin-top:0;">${escW(sess.title.trim() || "Sin título")}</h2>
+      <p style="font-size:10pt;color:#555;">${total} ítem${total===1?"":"s"} · ${reviewed} revisado${reviewed===1?"":"s"} · ${done} cumplido${done===1?"":"s"}</p>
+      <table style="border-collapse:collapse;width:100%;font-size:10.5pt;">
+        <thead><tr style="background:#F2F4F7;">
+          <th style="border:1px solid #999;padding:6px;">Revisado</th>
+          <th style="border:1px solid #999;padding:6px;">Cumplido</th>
+          <th style="border:1px solid #999;padding:6px;text-align:left;">Ítem</th>
+          <th style="border:1px solid #999;padding:6px;text-align:left;">Comentario</th>
+          <th style="border:1px solid #999;padding:6px;text-align:left;">Acuerdos</th>
+        </tr></thead>
+        <tbody>${rowsHtml}</tbody>
+      </table>
+    </body></html>
+  `;
+  const blob = new Blob(['\ufeff', html], { type: "application/msword" });
+  const safeName = (sess.title.trim() || "minuta").replace(/[\\/:*?"<>|]/g, "").trim() || "minuta";
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = safeName + ".doc";
+  a.click();
+  mnShowToast("Exportado como Word (.doc)");
+}
+
+// ---------- Navegación ----------
+function irAMinutas(){
+  vistaGlobal = "minutas";
+  if(!mnSessions.length) mnActiveIdx = 0;
+  renderSidebar(); renderMain(); mnUpdateAccessBtn();
+}
+function volverASucursales(){
+  vistaGlobal = "empresa";
+  renderSidebar(); renderMain(); mnUpdateAccessBtn();
+}
+function mnToggleVista(){
+  if(vistaGlobal === "minutas") volverASucursales();
+  else irAMinutas();
+}
+function mnUpdateAccessBtn(){
+  const btn = mnEl("mnAccessBtn");
+  const lbl = mnEl("mnAccessBtnLabel");
+  if(!btn || !lbl) return;
+  if(vistaGlobal === "minutas"){
+    btn.classList.add("primary");
+    lbl.textContent = "Ver sucursales";
+  } else {
+    btn.classList.remove("primary");
+    lbl.textContent = "Minutas";
+  }
+}
+function mnSetActive(idx){
+  vistaGlobal = "minutas"; mnActiveIdx = idx; mnFilter = "todos";
+  renderSidebar(); renderMain(); mnUpdateAccessBtn();
+}
+function mnSetFiltro(f){ mnFilter = f; renderMain(); }
+function mnToggleCfg(){ mnCfgOpen = !mnCfgOpen; renderMain(); }
+function mnGuardarScriptUrl(){
+  const v = mnEl("mnScriptUrlInput");
+  mnScriptUrl = v ? v.value.trim() : "";
+  mnSaveConfig();
+  mnShowToast(mnScriptUrl ? "URL de Apps Script guardada. Los cambios se guardarán solos de ahora en adelante." : "URL borrada — ahora solo puedes editar en pantalla y exportar.");
+  if (mnDirty) mnScheduleAutoSave();
+}
+
+// ---------- Render sidebar ----------
+function mnSidebarHtml(){
+  let html = `<div class="sb-section" style="display:flex;justify-content:space-between;align-items:center;">
+    <span>Minutas</span>
+    <span style="cursor:pointer;color:var(--g400);" title="Actualizar minutas" onclick="event.stopPropagation();mnFetchSheet(false);">↻</span>
+  </div>`;
+  if (!mnSessions.length){
+    html += `<div class="mn-sb-empty">${mnStatus.state==="err" ? "No se pudo cargar la pestaña 'Minuta'." : "Cargando minutas…"}</div>`;
+    return html;
+  }
+  mnSessions.forEach((sess, idx) => {
+    const total = sess.items.length;
+    const done = sess.items.filter(i=>i.cumplido).length;
+    const act = vistaGlobal === "minutas" && idx === mnActiveIdx;
+    const title = sess.title.trim() || "(Sin título)";
+    html += `<div class="sb-suc ${act?'active':''}" onclick="mnSetActive(${idx})" style="display:grid;grid-template-columns:1fr auto;gap:4px;align-items:center;padding:7px 14px;cursor:pointer;">
+      <div class="sb-suc-name" style="font-size:11px;font-weight:${act?700:500};color:${act?EMPRESA_COLOR:'var(--g700)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${mnEscapeHtml(title)}</div>
+      <div class="sb-suc-pct" style="font-size:10px;font-weight:700;color:${done===total&&total?'var(--ok)':'var(--g400)'};">${done}/${total}</div>
+    </div>`;
+  });
+  return html;
+}
+
+// ---------- Render main ----------
+function mnRenderMain(){
+  const total0 = mnSessions.length;
+  document.getElementById("main").innerHTML = `
+    <div class="emp-header">
+      <div class="emp-title">
+        <div class="emp-av" style="background:${EMPRESA_COLOR_L};color:${EMPRESA_COLOR}">📝</div>
+        <div><div class="emp-name">Minutas · ${EMPRESA_NOMBRE}</div></div>
+      </div>
+      <div class="mn-toolbar">
+        <span class="mn-status"><span class="mn-status-dot ${mnStatus.state==='ok'?'ok':mnStatus.state==='err'?'err':''}" id="mnStatusDot"></span><span id="mnStatusText">${mnEscapeHtml(mnStatus.text)}</span></span>
+        <button class="mn-topbtn" type="button" onclick="mnFetchSheet(false)">↻ Actualizar</button>
+        <button class="mn-topbtn" id="mnSaveBtn" type="button" onclick="mnSave(false)" title="Los cambios se guardan solos; usa esto para forzar el guardado ya" ${!total0?'disabled':''}>Guardar ahora</button>
+        <button class="mn-topbtn" type="button" onclick="mnExportCSV()" ${!total0?'disabled':''}>⇩ CSV</button>
+        <button class="mn-topbtn" type="button" onclick="mnExportWord()" ${!total0?'disabled':''}>📄 Word</button>
+        <button class="mn-topbtn" type="button" onclick="mnToggleCfg()">⚙</button>
+      </div>
+    </div>
+    <div class="mn-cfg ${mnCfgOpen?'open':''}">
+      <label>URL del Apps Script para guardar cambios en el Sheet</label>
+      <input type="text" id="mnScriptUrlInput" placeholder="https://script.google.com/macros/s/…/exec" value="${mnEscapeHtml(mnScriptUrl)}">
+      <span class="hint">Con esto configurado, cada edición se guarda sola en el Sheet ~1.5s después de dejar de escribir. Sin ella solo puedes editar en pantalla y exportar.</span>
+      <button class="mn-topbtn primary" type="button" onclick="mnGuardarScriptUrl()">Guardar URL</button>
+    </div>
+    <div class="kpi-row" id="mnKpiRow"></div>
+    <div class="card" id="mnCard"></div>
+  `;
+  mnRenderKPIs();
+  mnRenderCard();
+}
+
+function mnRenderKPIs(){
+  const kpiRow = mnEl("mnKpiRow");
+  if (!kpiRow) return;
+  if (!mnSessions.length){ kpiRow.innerHTML = ""; return; }
+  const sess = mnSessions[mnActiveIdx];
+  const items = sess ? sess.items : [];
+  const total = items.length;
+  const done = items.filter(i=>i.cumplido).length;
+  const reviewed = items.filter(i=>i.revisado).length;
+  const pend = total - done;
+  const pct = total ? Math.round(done/total*100) : 0;
+  kpiRow.innerHTML = `
+    <div class="kpi"><div class="kpi-lbl">Ítems en esta minuta</div><div class="kpi-val">${total}</div><div class="kpi-desc">${mnEscapeHtml(sess ? (sess.title.trim() || "Sin título") : "—")}</div></div>
+    <div class="kpi"><div class="kpi-lbl">Revisados</div><div class="kpi-val" style="color:var(--brand)">${reviewed}</div><div class="kpi-desc">Tratados en la reunión</div></div>
+    <div class="kpi"><div class="kpi-lbl">Cumplidos</div><div class="kpi-val" style="color:var(--ok)">${done}</div><div class="kpi-desc">Resueltos</div></div>
+    <div class="kpi"><div class="kpi-lbl">Pendientes</div><div class="kpi-val" style="color:var(--err)">${pend}</div><div class="kpi-desc">Sin cumplir aún</div></div>
+    <div class="kpi highlight"><div class="kpi-lbl">% Cumplimiento</div><div class="kpi-val">${pct}%</div><div class="kpi-desc">de esta minuta</div></div>
+  `;
+}
+
+function mnRenderCard(){
+  const card = mnEl("mnCard");
+  if (!card) return;
+  if (!mnSessions.length){ card.innerHTML = `<div class="mn-empty-state">${mnStatus.state==="err" ? "No se pudo cargar la pestaña 'Minuta' de la planilla Socovesa." : "Cargando minutas…"}</div>`; return; }
+  const sess = mnSessions[mnActiveIdx];
+  const items = sess.items;
+  const total = items.length;
+  const done = items.filter(i=>i.cumplido).length;
+  const pct = total ? Math.round(done/total*100) : 0;
+
+  let visibleIdxs = items.map((_, i) => i).filter(i => {
+    if (mnFilter === "pendientes") return !items[i].cumplido;
+    if (mnFilter === "revisados") return items[i].cumplido;
+    return true;
+  });
+
+  let html = `
+    <div class="card-header">
+      <div class="card-title-wrap">
+        <div><div class="card-title">${mnEscapeHtml(sess.title.trim() || "Sin título")}</div>
+        <div class="card-sub">${total} ítem${total===1?"":"s"} de seguimiento</div></div>
+      </div>
+      <div class="prog-wrap">
+        <div class="prog-bg"><div class="prog-fill" style="width:${pct}%;background:var(--ok);"></div></div>
+        <span class="prog-lbl">${pct}%</span>
+      </div>
+    </div>
+    <div class="filters">
+      <button class="fbtn ${mnFilter==='todos'?'on':''}" onclick="mnSetFiltro('todos')" type="button">Todos (${total})</button>
+      <button class="fbtn ${mnFilter==='pendientes'?'on':''}" onclick="mnSetFiltro('pendientes')" type="button">Pendientes (${total-done})</button>
+      <button class="fbtn ${mnFilter==='revisados'?'on':''}" onclick="mnSetFiltro('revisados')" type="button">Cumplidos (${done})</button>
+      <button class="fbtn" style="margin-left:auto;border-style:dashed;" onclick="mnOnAddRow()" type="button">+ Agregar ítem</button>
+    </div>
+  `;
+
+  if (!total){
+    html += `<div class="mn-empty-state">Sin ítems en esta minuta todavía.</div>`;
+  } else if (!visibleIdxs.length){
+    html += `<div class="mn-empty-state">No hay ítems en este filtro.</div>`;
+  } else {
+    html += `<table><thead><tr>
+      <th class="mn-mc">Revisado</th>
+      <th class="mn-mc">Cumplido</th>
+      <th>Ítem</th>
+      <th>Comentario</th>
+      <th>Acuerdos</th>
+      <th class="mn-mc">Estado</th>
+      <th class="mn-rc"></th>
+    </tr></thead><tbody>`;
+    visibleIdxs.forEach(i => {
+      const it = items[i];
+      html += `
+        <tr class="${it.cumplido?'mn-done':''}">
+          <td class="mn-mc"><input type="checkbox" onchange="mnOnRevisado(${i}, this.checked)" ${it.revisado?"checked":""}></td>
+          <td class="mn-mc"><input type="checkbox" onchange="mnOnCheck(${i}, this.checked)" ${it.cumplido?"checked":""}></td>
+          <td><textarea class="mn-item-input" oninput="mnOnItem(${i}, this.value)" placeholder="Ítem de la minuta…">${mnEscapeHtml(it.item)}</textarea></td>
+          <td><textarea class="mn-cell-textarea" oninput="mnOnComentario(${i}, this.value)" placeholder="Comentario…">${mnEscapeHtml(it.comentario)}</textarea></td>
+          <td><textarea class="mn-cell-textarea" oninput="mnOnAcuerdos(${i}, this.value)" placeholder="Acuerdos…">${mnEscapeHtml(it.acuerdos)}</textarea></td>
+          <td class="mn-mc"><button class="badge ${it.cumplido?'b-ok':'b-falta'}" onclick="mnOnBadgeToggle(${i})" type="button">${it.cumplido?'✓ Cumplido':'Pendiente'}</button></td>
+          <td class="mn-mc"><button class="mn-remove-btn" onclick="mnOnRemove(${i})" title="Eliminar" type="button">✕</button></td>
+        </tr>
+      `;
+    });
+    html += `</tbody></table>`;
+  }
+  card.innerHTML = html;
+}
+
+function mnOnCheck(i, val){ mnSessions[mnActiveIdx].items[i].cumplido = val; mnMarkDirty(); mnRenderKPIs(); mnRenderCard(); renderSidebar(); }
+function mnOnRevisado(i, val){ mnSessions[mnActiveIdx].items[i].revisado = val; mnMarkDirty(); }
+function mnOnBadgeToggle(i){ mnSessions[mnActiveIdx].items[i].cumplido = !mnSessions[mnActiveIdx].items[i].cumplido; mnMarkDirty(); mnRenderKPIs(); mnRenderCard(); renderSidebar(); }
+function mnOnItem(i, val){ mnSessions[mnActiveIdx].items[i].item = val; mnMarkDirty(); }
+function mnOnComentario(i, val){ mnSessions[mnActiveIdx].items[i].comentario = val; mnMarkDirty(); }
+function mnOnAcuerdos(i, val){ mnSessions[mnActiveIdx].items[i].acuerdos = val; mnMarkDirty(); }
+function mnOnRemove(i){
+  if (!confirm("¿Eliminar este ítem?")) return;
+  mnSessions[mnActiveIdx].items.splice(i,1);
+  mnMarkDirty(); mnRenderKPIs(); mnRenderCard(); renderSidebar();
+}
+function mnOnAddRow(){
+  mnSessions[mnActiveIdx].items.push({ item:"", cumplido:false, comentario:"", acuerdos:"", revisado:false });
+  mnMarkDirty(); mnRenderCard(); renderSidebar();
+}
+
 // INIT
 cargarDatos(false);
 setInterval(() => cargarDatos(true), REFRESH_MINUTOS * 60 * 1000);
+
+mnLoadConfig();
+mnLoadCachedData();
+mnFetchSheet(true);
+setInterval(() => mnFetchSheet(true), REFRESH_MINUTOS * 60 * 1000);
+
+window.addEventListener("beforeunload", (e) => {
+  if (mnDirty && mnScriptUrl){ e.preventDefault(); e.returnValue = ""; }
+});
 
   const CSS = `
     @page { size: legal portrait; margin: 16mm 14mm 12mm; }
@@ -2432,5 +3066,8 @@ setInterval(() => cargarDatos(true), REFRESH_MINUTOS * 60 * 1000);
 
 
 </script>
+<div class="mn-toast" id="mnToast"></div>
+<div id="mnSaveFrameHost" style="display:none"></div>
+
 </body>
 </html>
