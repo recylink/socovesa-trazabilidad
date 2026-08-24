@@ -765,6 +765,33 @@ function pctTrazabilidadHastaMes(emp, hastaM){
   return tot===0?null:Math.round(ok/tot*100);
 }
 
+// RESPEL no exige declaración SINADER
+function esRespel_(r){ return /respel/i.test(r.nombre||""); }
+
+// % SINADER acumulado Enero→hastaMes (excluye RESPEL) — igual a Abastible
+function pctSinaderHastaMes(emp, hastaM){
+  const idx = MESES.indexOf(hastaM);
+  const meses = MESES.slice(0, idx+1).filter(m=>!esFuturo(m));
+  let ok=0, tot=0;
+  const pendientes = {};
+  meses.forEach(m=>{
+    resImportados(emp, m).forEach(r=>{
+      if(esRespel_(r)) return;
+      const imp = esNuevoFormato(r) ? r.imp : 1;
+      const decl = docFrac(r.docs["Cert. declaración"], imp);
+      if(!decl) return;
+      tot += decl[1]; ok += decl[0];
+      const falta = decl[1] - decl[0];
+      if(falta > 0) pendientes[r.nombre] = (pendientes[r.nombre]||0) + falta;
+    });
+  });
+  const avance = tot===0 ? null : Math.round(ok/tot*100);
+  const detalle = Object.keys(pendientes).length
+    ? Object.entries(pendientes).map(([nombre,n])=>`${nombre}: ${n} sin declaración SINADER`).join(" | ")
+    : "";
+  return { avance, detalle };
+}
+
 // % TRAZABILIDAD ANUAL acumulado
 function pctTrazabilidadAnual(emp, hastaMes){
   hastaMes = hastaMes || mesActual;
@@ -1558,6 +1585,7 @@ function estadoObjetivosVisibles(emp, mesActualParam){
     .filter(o => !esValorizacionSintetica(o.texto))
     .map(o => {
       const esTrazabilidad = /trazabilidad/i.test(o.texto);
+      const esSinader = /sinader/i.test(o.texto);
       const esOperacionUnitaria = /operaciones? en forma unitaria/i.test(o.texto);
 
       let avance, metaNum, detalle, ambito, ok;
@@ -1569,6 +1597,18 @@ function estadoObjetivosVisibles(emp, mesActualParam){
         avance = pctTrazabilidadHastaMes(emp, mesActualParam);
         metaNum = 100;
         detalle = "Importaciones + Transportista + Disposición final de esta obra";
+        ambito = emp.sucursal || "esta obra";
+        ok = avance !== null && avance >= metaNum;
+      } else if (esSinader) {
+        // Calculado en vivo (acumulado Enero → mes seleccionado) en vez de
+        // usar o.avance/o.detalle del backend, que solo trae la foto del
+        // último mes cargado en la hoja "🎯 Objetivos" y por eso podía
+        // mostrar 0% aunque hubiera declaraciones ya cargadas en meses
+        // anteriores.
+        const r = pctSinaderHastaMes(emp, mesActualParam);
+        avance = r.avance;
+        metaNum = 100;
+        detalle = r.detalle || "Todas las declaraciones SINADER cargadas (excluye RESPEL)";
         ambito = emp.sucursal || "esta obra";
         ok = avance !== null && avance >= metaNum;
       } else if (esOperacionUnitaria) {
