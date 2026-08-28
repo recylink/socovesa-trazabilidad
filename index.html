@@ -387,6 +387,11 @@ tr.mn-done .mn-cell-textarea{color:var(--g400);}
       </select>
     </div>
 
+    <!-- ACCESO A FGR (tabla comparativa entre todas las obras) -->
+    <button class="mn-topbtn" id="fgrAccessBtn" type="button" onclick="fgrToggleVista()" style="height:34px;">
+      📐 <span id="fgrAccessBtnLabel">FGR</span>
+    </button>
+
     <!-- ACCESO A MINUTAS -->
     <button class="mn-topbtn ${''}" id="mnAccessBtn" type="button" onclick="mnToggleVista()" style="height:34px;">
       📝 <span id="mnAccessBtnLabel">Minutas</span>
@@ -1922,6 +1927,7 @@ function renderFGR(){
 // ============================================================
 function renderMain(){
   if(vistaGlobal === "minutas"){ mnRenderMain(); return; }
+  if(vistaGlobal === "fgr"){ renderFGRGlobal(); return; }
   const emp = EMPRESAS.find(e=>e.id===empActual);
   const d = emp.mensual[mesActual];
   // Pendientes = solo trazabilidad incompleta
@@ -1940,7 +1946,6 @@ function renderMain(){
   else if(vistaActual==="anual") vistaHTML = renderAnual(emp);
   else if(vistaActual==="obj")   vistaHTML = renderObjetivos(emp);
   else if(vistaActual==="val")   vistaHTML = renderValorizacion(emp);
-  else if(vistaActual==="fgr")   vistaHTML = renderFGR();
 
   // Badge valorización: % del mes actual
   const pctValBadge = (()=>{
@@ -1995,9 +2000,6 @@ function renderMain(){
       <button class="vtab ${vistaActual==='val'?'active':''}" onclick="setVista('val')">
         ♻️ Valorización
         ${pctValBadge!==null?`<span class="vtab-badge">${pctValBadge}%</span>`:''}
-      </button>
-      <button class="vtab ${vistaActual==='fgr'?'active':''}" onclick="setVista('fgr')">
-        📐 FGR
       </button>
     </div>
     ${vistaHTML}
@@ -2310,7 +2312,7 @@ function setEmpDesdeSelect(id){
 // ============================================================
 // EVENTOS
 // ============================================================
-function setEmp(id){ empActual=id; filtroActual="todos"; vistaActual="mensual"; vistaGlobal="empresa"; renderSidebar(); renderMain(); buildSucursalSelect(); mnUpdateAccessBtn(); }
+function setEmp(id){ empActual=id; filtroActual="todos"; vistaActual="mensual"; vistaGlobal="empresa"; renderSidebar(); renderMain(); buildSucursalSelect(); mnUpdateAccessBtn(); fgrUpdateAccessBtn(); }
 function setVista(v){  vistaActual=v; renderMain(); }
 function setFiltro(f){ filtroActual=f; renderMain(); }
 function setMes(m){    mesActual=m;   filtroActual="todos"; renderSidebar(); renderMain(); }
@@ -2883,11 +2885,11 @@ function mnExportWord(){
 function irAMinutas(){
   vistaGlobal = "minutas";
   if(!mnSessions.length) mnActiveIdx = 0;
-  renderSidebar(); renderMain(); mnUpdateAccessBtn();
+  renderSidebar(); renderMain(); mnUpdateAccessBtn(); fgrUpdateAccessBtn();
 }
 function volverASucursales(){
   vistaGlobal = "empresa";
-  renderSidebar(); renderMain(); mnUpdateAccessBtn();
+  renderSidebar(); renderMain(); mnUpdateAccessBtn(); fgrUpdateAccessBtn();
 }
 function mnToggleVista(){
   if(vistaGlobal === "minutas") volverASucursales();
@@ -2907,7 +2909,46 @@ function mnUpdateAccessBtn(){
 }
 function mnSetActive(idx){
   vistaGlobal = "minutas"; mnActiveIdx = idx; mnFilter = "todos";
-  renderSidebar(); renderMain(); mnUpdateAccessBtn();
+  renderSidebar(); renderMain(); mnUpdateAccessBtn(); fgrUpdateAccessBtn();
+}
+
+// ---------- FGR (botón global, junto a Minutas) ----------
+// A pedido del usuario: la pestaña FGR (tabla comparativa entre obras) dejó
+// de vivir dentro de las vtabs de cada obra y ahora es una vista global,
+// accesible con un botón en la topbar — mismo mecanismo que Minutas
+// (vistaGlobal="fgr"), pero sin reemplazar el sidebar (se deja el listado
+// normal de obras, para poder seguir navegando/seleccionando una desde ahí;
+// al hacerlo, setEmp() ya vuelve a vistaGlobal="empresa" solo).
+function irAFGR(){
+  vistaGlobal = "fgr";
+  renderSidebar(); renderMain(); mnUpdateAccessBtn(); fgrUpdateAccessBtn();
+}
+function fgrToggleVista(){
+  if(vistaGlobal === "fgr") volverASucursales();
+  else irAFGR();
+}
+function fgrUpdateAccessBtn(){
+  const btn = mnEl("fgrAccessBtn");
+  const lbl = mnEl("fgrAccessBtnLabel");
+  if(!btn || !lbl) return;
+  if(vistaGlobal === "fgr"){
+    btn.classList.add("primary");
+    lbl.textContent = "Ver sucursales";
+  } else {
+    btn.classList.remove("primary");
+    lbl.textContent = "FGR";
+  }
+}
+function renderFGRGlobal(){
+  document.getElementById("main").innerHTML = `
+    <div class="emp-header">
+      <div class="emp-title">
+        <div class="emp-av" style="background:${EMPRESA_COLOR_L};color:${EMPRESA_COLOR}">📐</div>
+        <div><div class="emp-name">FGR — comparativa entre obras</div></div>
+      </div>
+    </div>
+    ${renderFGR()}
+  `;
 }
 function mnSetFiltro(f){ mnFilter = f; renderMain(); }
 function mnToggleCfg(){ mnCfgOpen = !mnCfgOpen; renderMain(); }
