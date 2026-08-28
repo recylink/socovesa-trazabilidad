@@ -1832,47 +1832,50 @@ function renderValorizacion(emp){
 // de la hoja "Total Residuos"); m2 construidos es manual (localStorage,
 // ver FGR_M2_STORE) porque hoy no existe una hoja fuente para ese dato.
 // ============================================================
-function renderFGR(emp){
-  const fgrData = emp.fgr || { totalM3: 0, primerRegistro: null, ultimoRegistro: null };
-  const m2 = getM2Construidos(emp.id);
-  const tieneM3 = fgrData.totalM3 > 0;
-  const fgrVal = (m2 && m2>0 && tieneM3) ? Math.round(fgrData.totalM3/m2*1000)/1000 : null;
+// Tabla comparativa entre TODAS las obras (no solo la seleccionada) — a
+// pedido del usuario, para poder comparar FGR entre proyectos de un vistazo.
+// La fila de la obra actualmente seleccionada (empActual) queda resaltada.
+function renderFGR(){
+  const filas = EMPRESAS.map(function(e){
+    const fgrData = e.fgr || { totalM3: 0, primerRegistro: null, ultimoRegistro: null };
+    const m2 = getM2Construidos(e.id);
+    const tieneM3 = fgrData.totalM3 > 0;
+    const fgrVal = (m2 && m2>0 && tieneM3) ? Math.round(fgrData.totalM3/m2*1000)/1000 : null;
+    return { emp:e, fgrData, m2, fgrVal, tieneM3 };
+  });
 
-  const m3Fmt = tieneM3 ? fgrData.totalM3.toLocaleString('es-CL',{maximumFractionDigits:2}) : "&#8212;";
-  const m2Fmt = (m2 && m2>0) ? m2.toLocaleString('es-CL',{maximumFractionDigits:2}) : "&#8212;";
-  const fgrFmt = fgrVal===null ? "&#8212;" : fgrVal.toLocaleString('es-CL',{maximumFractionDigits:3});
+  const totalM3Global = filas.reduce((s,f)=>s+(f.fgrData.totalM3||0),0);
+  const conFgr = filas.filter(f=>f.fgrVal!==null);
+  const fgrProm = conFgr.length ? Math.round(conFgr.reduce((s,f)=>s+f.fgrVal,0)/conFgr.length*1000)/1000 : null;
+  const mejor = conFgr.length ? conFgr.reduce((a,b)=>a.fgrVal<=b.fgrVal?a:b) : null;
 
   return `
     <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px;">
       <div class="kpi">
-        <div class="kpi-lbl">Total M3 registrados</div>
-        <div class="kpi-val">${m3Fmt}</div>
+        <div class="kpi-lbl">Total M3 (todas las obras)</div>
+        <div class="kpi-val">${totalM3Global>0?totalM3Global.toLocaleString('es-CL',{maximumFractionDigits:2}):"&#8212;"}</div>
         <div class="kpi-desc">Suma histórica &middot; hoja "Total Residuos"</div>
       </div>
       <div class="kpi">
-        <div class="kpi-lbl">M2 construidos</div>
-        <div class="kpi-val" style="font-size:16px;display:flex;align-items:center;gap:6px;">
-          <input type="number" min="0" step="0.01" id="fgrM2Input_${emp.id}" value="${m2??''}" placeholder="Ingresar m2"
-            style="width:100px;padding:5px 8px;border:1.5px solid var(--bd);border-radius:6px;font-family:inherit;font-size:14px;font-weight:700;color:var(--tx);">
-          <button class="pend-btn" style="margin-top:0;padding:5px 10px;font-size:11px;" onclick="guardarM2Construidos('${emp.id}')">Guardar</button>
-        </div>
-        <div class="kpi-desc">Editable &middot; dato manual, sin hoja fuente aún</div>
-      </div>
-      <div class="kpi ${fgrVal!==null?'highlight':''}">
-        <div class="kpi-lbl">FGR (m3 / m2)</div>
-        <div class="kpi-val">${fgrFmt}</div>
-        <div class="kpi-desc">Total M3 &divide; M2 construidos</div>
+        <div class="kpi-lbl">Obras con FGR calculado</div>
+        <div class="kpi-val">${conFgr.length} / ${filas.length}</div>
+        <div class="kpi-desc">Requiere m2 construidos cargados</div>
       </div>
       <div class="kpi">
-        <div class="kpi-lbl">Período con registros</div>
-        <div class="kpi-val" style="font-size:15px;">${fgrData.primerRegistro ? (fgrData.primerRegistro===fgrData.ultimoRegistro?fgrData.primerRegistro:fgrData.primerRegistro+' → '+fgrData.ultimoRegistro) : "&#8212;"}</div>
-        <div class="kpi-desc">${fgrData.primerRegistro?"Primer a último mes con residuos":"Sin registros de residuos aún"}</div>
+        <div class="kpi-lbl">FGR promedio</div>
+        <div class="kpi-val">${fgrProm===null?"&#8212;":fgrProm}</div>
+        <div class="kpi-desc">m3 &divide; m2 &middot; entre obras con dato</div>
+      </div>
+      <div class="kpi highlight">
+        <div class="kpi-lbl">Mejor FGR</div>
+        <div class="kpi-val" style="font-size:16px;">${mejor?mejor.fgrVal:"&#8212;"}</div>
+        <div class="kpi-desc">${mejor?mejor.emp.sucursal:"Sin datos suficientes"}</div>
       </div>
     </div>
     <div class="card">
       <div class="card-header">
         <div>
-          <div class="card-title">Factor de Generación de Residuos (FGR) &middot; ${emp.sucursal}</div>
+          <div class="card-title">Factor de Generación de Residuos (FGR) &middot; comparativa entre obras</div>
           <div class="card-sub">FGR = Total m3 de residuos generados &divide; m2 construidos del proyecto</div>
         </div>
       </div>
@@ -1883,22 +1886,33 @@ function renderFGR(emp){
             <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:left;border-bottom:1px solid var(--bd);">PRIMER REGISTRO</th>
             <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:left;border-bottom:1px solid var(--bd);">ÚLTIMO REGISTRO</th>
             <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:right;border-bottom:1px solid var(--bd);">TOTAL M3</th>
-            <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:right;border-bottom:1px solid var(--bd);">M2 CONSTRUIDOS</th>
+            <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:right;border-bottom:1px solid var(--bd);min-width:160px;">M2 CONSTRUIDOS</th>
             <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:right;border-bottom:1px solid var(--bd);">FGR</th>
           </tr></thead>
           <tbody>
-            <tr>
-              <td style="padding:10px 14px;font-size:12px;font-weight:700;color:var(--g800);">${emp.sucursal}</td>
-              <td style="padding:10px 12px;font-size:12px;color:var(--g600);">${fgrData.primerRegistro || "&#8212;"}</td>
-              <td style="padding:10px 12px;font-size:12px;color:var(--g600);">${fgrData.ultimoRegistro || "&#8212;"}</td>
-              <td style="padding:10px 12px;font-size:12px;font-weight:700;color:var(--g800);text-align:right;">${m3Fmt}</td>
-              <td style="padding:10px 12px;font-size:12px;font-weight:700;color:var(--g800);text-align:right;">${m2Fmt}</td>
-              <td style="padding:10px 12px;font-size:13px;font-weight:800;color:var(--brand);text-align:right;">${fgrFmt}</td>
-            </tr>
+            ${filas.map(function(f, i){
+              const esActual = f.emp.id===empActual;
+              const bg = esActual ? 'background:#EBF5FC;' : (i%2 ? 'background:var(--g25);' : '');
+              const m3Fmt = f.tieneM3 ? f.fgrData.totalM3.toLocaleString('es-CL',{maximumFractionDigits:2}) : "&#8212;";
+              const fgrFmt = f.fgrVal===null ? "&#8212;" : f.fgrVal.toLocaleString('es-CL',{maximumFractionDigits:3});
+              return `<tr style="${bg}">
+                <td style="padding:9px 14px;font-size:12px;font-weight:${esActual?'700':'500'};color:${esActual?'var(--brand)':'var(--g800)'};">${f.emp.sucursal}</td>
+                <td style="padding:9px 12px;font-size:12px;color:var(--g600);">${f.fgrData.primerRegistro || "&#8212;"}</td>
+                <td style="padding:9px 12px;font-size:12px;color:var(--g600);">${f.fgrData.ultimoRegistro || "&#8212;"}</td>
+                <td style="padding:9px 12px;font-size:12px;font-weight:700;color:var(--g800);text-align:right;">${m3Fmt}</td>
+                <td style="padding:6px 12px;text-align:right;">
+                  <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
+                    <input type="number" min="0" step="0.01" id="fgrM2Input_${f.emp.id}" value="${f.m2??''}" placeholder="m2"
+                      style="width:78px;padding:4px 6px;border:1.5px solid var(--bd);border-radius:6px;font-family:inherit;font-size:12px;font-weight:600;color:var(--tx);text-align:right;">
+                    <button class="pend-btn" style="margin-top:0;padding:4px 8px;font-size:10px;" onclick="guardarM2Construidos('${f.emp.id}')">Guardar</button>
+                  </div>
+                </td>
+                <td style="padding:9px 12px;font-size:13px;font-weight:800;color:var(--brand);text-align:right;">${fgrFmt}</td>
+              </tr>`;
+            }).join("")}
           </tbody>
         </table>
       </div>
-      ${!tieneM3?'<div class="obs-banner">Aún no hay residuos registrados en "Total Residuos" para esta obra &mdash; el Total M3 y las fechas de registro aparecen apenas se sincronice el primer Excel.</div>':''}
     </div>
   `;
 }
@@ -1926,7 +1940,7 @@ function renderMain(){
   else if(vistaActual==="anual") vistaHTML = renderAnual(emp);
   else if(vistaActual==="obj")   vistaHTML = renderObjetivos(emp);
   else if(vistaActual==="val")   vistaHTML = renderValorizacion(emp);
-  else if(vistaActual==="fgr")   vistaHTML = renderFGR(emp);
+  else if(vistaActual==="fgr")   vistaHTML = renderFGR();
 
   // Badge valorización: % del mes actual
   const pctValBadge = (()=>{
