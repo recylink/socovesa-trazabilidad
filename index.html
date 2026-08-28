@@ -466,6 +466,11 @@ let MESES_ACTIVOS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio"];
 // arranca null y el backend elige el más reciente si no se manda ninguno.
 let anioSeleccionado = null;
 let ANIOS_DISPONIBLES = [];
+// Lista de TODAS las obras para la pestaña FGR (comparativa), sin importar
+// el año seleccionado — a diferencia de EMPRESAS (sidebar), que SI queda
+// filtrado por año. Cada item: {id, sucursal, fgr:{totalM3, primerRegistro,
+// ultimoRegistro}}.
+let TODAS_OBRAS_FGR = [];
 const DOCS_RES = ["Cert. tratamiento","Factura","Cert. declaración","Transportista","Disposición final"];
 // ── Grupos de docs para la vista mensual dividida ─────────
 const DOCS_TRAZO_COLS = ["Transportista","Disposición final"]; // + Importaciones = trazabilidad
@@ -1841,7 +1846,11 @@ function renderValorizacion(emp){
 // pedido del usuario, para poder comparar FGR entre proyectos de un vistazo.
 // La fila de la obra actualmente seleccionada (empActual) queda resaltada.
 function renderFGR(){
-  const filas = EMPRESAS.map(function(e){
+  // Usa TODAS_OBRAS_FGR (todas las obras, sin filtro de año) en vez de
+  // EMPRESAS (que SI queda filtrado por el año seleccionado, para el
+  // sidebar) — a pedido del usuario, la comparativa de FGR debe verse
+  // completa sin importar qué año esté elegido arriba.
+  const filas = TODAS_OBRAS_FGR.map(function(e){
     const fgrData = e.fgr || { totalM3: 0, primerRegistro: null, ultimoRegistro: null };
     const m2 = getM2Construidos(e.id);
     const tieneM3 = fgrData.totalM3 > 0;
@@ -2489,6 +2498,10 @@ function cargarDatos(esRefrescoSilencioso){
       ? payload.ANIOS_DISPONIBLES
       : ANIOS_DISPONIBLES;
     anioSeleccionado = payload.ANIO_SELECCIONADO || anioSeleccionado;
+
+    TODAS_OBRAS_FGR = payload.TODAS_OBRAS_FGR && payload.TODAS_OBRAS_FGR.length
+      ? payload.TODAS_OBRAS_FGR
+      : TODAS_OBRAS_FGR;
 
     if(!empActual && EMPRESAS.length) empActual = EMPRESAS[0].id;
     if(!mesActual || !MESES_ACTIVOS.includes(mesActual)) {
