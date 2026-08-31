@@ -2055,6 +2055,16 @@ function exportarPrint(){
   setTimeout(imprimirInformeCompleto, 100);
 }
 
+// Envuelve el contenido de un PDF en una tabla con thead/tfoot vacíos que
+// actúan como margen superior/inferior — a diferencia del padding de
+// <body>, el thead/tfoot de una tabla SÍ se repite en cada hoja impresa,
+// así el margen queda estándar en todas las páginas (ver .pf-table en CSS).
+function envolverParaImprimir_(contenidoHtml){
+  return '<table class="pf-table"><thead><tr><td><div class="pf-spacer-top"></div></td></tr></thead>'
+    +'<tbody><tr><td>'+contenidoHtml+'</td></tr></tbody>'
+    +'<tfoot><tr><td><div class="pf-spacer-bottom"></div></td></tr></tfoot></table>';
+}
+
 // Genera una vista de impresión completa con TODOS los meses
 function imprimirInformeCompleto(){
   const emp   = EMPRESAS.find(e=>e.id===empActual);
@@ -2273,10 +2283,10 @@ function imprimirInformeCompleto(){
     +'<style>'
     +CSS
     +'</style>'
-    +'</head><body>'+body
-    +'<div class="footer"><span>Recylink · Portal de Trazabilidad</span>'
-    +'<span>'+EMPRESA_NOMBRE+' · '+emp.sucursal+' · '+mesActual+' '+anioSeleccionado+'</span>'
-    +'<span>Generado el '+fecha+'</span></div>'
+    +'</head><body>'+envolverParaImprimir_(body
+      +'<div class="footer"><span>Recylink · Portal de Trazabilidad</span>'
+      +'<span>'+EMPRESA_NOMBRE+' · '+emp.sucursal+' · '+mesActual+' '+anioSeleccionado+'</span>'
+      +'<span>Generado el '+fecha+'</span></div>')
     +'<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script>'
     +'</body></html>';
   const blob = new Blob([fullHtml], {type:'text/html;charset=utf-8'});
@@ -3072,10 +3082,10 @@ function exportarFGRPDF(){
       table td { font-size: 12px; padding: 8px 10px; }
     `
     +'</style>'
-    +'</head><body>'+body
-    +'<div class="footer"><span>Recylink · Portal de Trazabilidad</span>'
-    +'<span>'+EMPRESA_NOMBRE+' · Comparativa FGR</span>'
-    +'<span>Generado el '+fecha+'</span></div>'
+    +'</head><body>'+envolverParaImprimir_(body
+      +'<div class="footer"><span>Recylink · Portal de Trazabilidad</span>'
+      +'<span>'+EMPRESA_NOMBRE+' · Comparativa FGR</span>'
+      +'<span>Generado el '+fecha+'</span></div>')
     +'<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script>'
     +'</body></html>';
   const blob = new Blob([fullHtml], {type:'text/html;charset=utf-8'});
@@ -3269,17 +3279,26 @@ window.addEventListener("beforeunload", (e) => {
     /* margin:0 en @page (en vez de los mm de antes) es lo que hace que Chrome
        oculte el encabezado/pie automatico de impresion (fecha, titulo, URL
        del blob, "pagina X de Y") — con margen > 0 Chrome usa ese espacio
-       para dibujarlos; el margen visual del documento se replica con
-       padding en body en su lugar. */
+       para dibujarlos. El margen visual del documento YA NO se hace con
+       padding en <body> (el padding de body no se repite entre paginas:
+       solo se ve al principio de la primera hoja y al final de la ultima,
+       dejando las hojas del medio pegadas al borde) sino con una tabla
+       envolvente (.pf-table, ver envolverParaImprimir_) cuyo <thead>/<tfoot>
+       SI se repiten en cada hoja impresa — asi el margen superior/inferior
+       queda estandar en todas las paginas del PDF, no solo la primera/ultima. */
     @page { size: legal portrait; margin: 0; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, 'Segoe UI', Arial, sans-serif;
       color: #1a1a2e; background: #fff;
       font-size: 8.5px; line-height: 1.5;
-      padding: 16mm 14mm 12mm;
     }
     @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+    .pf-table { width: 100%; border-collapse: collapse; }
+    .pf-table > thead > tr > td, .pf-table > tfoot > tr > td { padding: 0; border: none; }
+    .pf-spacer-top { height: 16mm; }
+    .pf-spacer-bottom { height: 12mm; }
+    .pf-table > tbody > tr > td { padding: 0 14mm; border: none; }
 
     /* ── CABECERA ── */
     .ph {
