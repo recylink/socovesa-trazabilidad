@@ -1850,18 +1850,7 @@ function renderFGR(){
   // EMPRESAS (que SI queda filtrado por el año seleccionado, para el
   // sidebar) — a pedido del usuario, la comparativa de FGR debe verse
   // completa sin importar qué año esté elegido arriba.
-  const filas = TODAS_OBRAS_FGR.map(function(e){
-    const fgrData = e.fgr || { totalM3: 0, primerRegistro: null, ultimoRegistro: null };
-    const m2 = getM2Construidos(e.id);
-    const tieneM3 = fgrData.totalM3 > 0;
-    const fgrVal = (m2 && m2>0 && tieneM3) ? Math.round(fgrData.totalM3/m2*1000)/1000 : null;
-    return { emp:e, fgrData, m2, fgrVal, tieneM3 };
-  });
-
-  const totalM3Global = filas.reduce((s,f)=>s+(f.fgrData.totalM3||0),0);
-  const conFgr = filas.filter(f=>f.fgrVal!==null);
-  const fgrProm = conFgr.length ? Math.round(conFgr.reduce((s,f)=>s+f.fgrVal,0)/conFgr.length*1000)/1000 : null;
-  const mejor = conFgr.length ? conFgr.reduce((a,b)=>a.fgrVal<=b.fgrVal?a:b) : null;
+  const { filas, totalM3Global, conFgr, fgrProm, mejor } = computeFGRFilas_();
 
   return `
     <div class="kpi-row" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px;">
@@ -2959,9 +2948,130 @@ function renderFGRGlobal(){
         <div class="emp-av" style="background:${EMPRESA_COLOR_L};color:${EMPRESA_COLOR}">📐</div>
         <div><div class="emp-name">FGR — comparativa entre obras</div></div>
       </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-export" style="background:#F04438;" onclick="exportarFGRPDF()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </button>
+        <button class="btn-export" style="background:#039855;" onclick="exportarFGRExcel()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+          Excel
+        </button>
+      </div>
     </div>
     ${renderFGR()}
   `;
+}
+
+// Datos base de la comparativa FGR — factorizado de renderFGR() para
+// reutilizarlo también en las exportaciones (PDF/Excel), sin duplicar el
+// cálculo de fgrVal/promedio/mejor.
+function computeFGRFilas_(){
+  const filas = TODAS_OBRAS_FGR.map(function(e){
+    const fgrData = e.fgr || { totalM3: 0, primerRegistro: null, ultimoRegistro: null };
+    const m2 = getM2Construidos(e.id);
+    const tieneM3 = fgrData.totalM3 > 0;
+    const fgrVal = (m2 && m2>0 && tieneM3) ? Math.round(fgrData.totalM3/m2*1000)/1000 : null;
+    return { emp:e, fgrData, m2, fgrVal, tieneM3 };
+  });
+  const totalM3Global = filas.reduce((s,f)=>s+(f.fgrData.totalM3||0),0);
+  const conFgr = filas.filter(f=>f.fgrVal!==null);
+  const fgrProm = conFgr.length ? Math.round(conFgr.reduce((s,f)=>s+f.fgrVal,0)/conFgr.length*1000)/1000 : null;
+  const mejor = conFgr.length ? conFgr.reduce((a,b)=>a.fgrVal<=b.fgrVal?a:b) : null;
+  return { filas, totalM3Global, conFgr, fgrProm, mejor };
+}
+
+// CSV (abre en Excel) con la tabla comparativa de FGR completa.
+function exportarFGRExcel(){
+  const { filas } = computeFGRFilas_();
+  const rows = [
+    ['Obra', 'Primer Registro', 'Último Registro', 'Total M3', 'M2 Construidos', 'FGR (m3/m2)']
+  ];
+  filas.forEach(function(f){
+    rows.push([
+      f.emp.sucursal,
+      f.fgrData.primerRegistro || '',
+      f.fgrData.ultimoRegistro || '',
+      f.tieneM3 ? f.fgrData.totalM3 : '',
+      (f.m2!=null && f.m2!=='') ? f.m2 : '',
+      f.fgrVal!==null ? f.fgrVal : ''
+    ]);
+  });
+  const bom  = '﻿';
+  const csv  = bom + rows.map(r => r.map(v => '"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = 'FGR_' + EMPRESA_NOMBRE + '_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// PDF (vía diálogo de impresión, mismo mecanismo que imprimirInformeCompleto)
+// con la tabla comparativa de FGR completa entre obras.
+function exportarFGRPDF(){
+  const { filas, totalM3Global, conFgr, fgrProm, mejor } = computeFGRFilas_();
+  const now   = new Date();
+  const fecha = now.toLocaleDateString('es-CL',{day:'2-digit',month:'long',year:'numeric'});
+
+  const filasHtml = filas.map(function(f,i){
+    const m3Fmt  = f.tieneM3 ? f.fgrData.totalM3.toLocaleString('es-CL',{maximumFractionDigits:2}) : '—';
+    const m2Fmt  = (f.m2!=null && f.m2!=='') ? f.m2 : '—';
+    const fgrFmt = f.fgrVal===null ? '—' : f.fgrVal.toLocaleString('es-CL',{maximumFractionDigits:3});
+    return `<tr class="${i%2?'even':''}">
+      <td class="tl">${f.emp.sucursal}</td>
+      <td>${f.fgrData.primerRegistro || '—'}</td>
+      <td>${f.fgrData.ultimoRegistro || '—'}</td>
+      <td>${m3Fmt}</td>
+      <td>${m2Fmt}</td>
+      <td style="font-weight:700;color:#0F4C81;">${fgrFmt}</td>
+    </tr>`;
+  }).join('');
+
+  const body = `
+    <div class="ph">
+      <div class="ph-left">
+        <div class="ph-circle">📐</div>
+        <div><div class="ph-brand">Recylink · Portal de Trazabilidad</div><div class="ph-portal">FGR — comparativa entre obras</div></div>
+      </div>
+      <div class="ph-right">
+        <div class="ph-suc">${EMPRESA_NOMBRE}</div>
+        <div class="ph-meta">Todas las obras · Generado el ${fecha}</div>
+      </div>
+    </div>
+    <div class="kgrid">
+      <div class="kbox c-blue"><div class="klbl">Total M3 (todas las obras)</div><div class="kval">${totalM3Global>0?totalM3Global.toLocaleString('es-CL',{maximumFractionDigits:2}):'—'}</div><div class="kdesc">Suma histórica · hoja "Total Residuos"</div></div>
+      <div class="kbox c-green"><div class="klbl">Obras con FGR calculado</div><div class="kval">${conFgr.length} / ${filas.length}</div><div class="kdesc">Requiere m2 construidos cargados</div></div>
+      <div class="kbox c-orange"><div class="klbl">FGR promedio</div><div class="kval">${fgrProm===null?'—':fgrProm}</div><div class="kdesc">m3 ÷ m2 · entre obras con dato</div></div>
+      <div class="kbox c-purple hi"><div class="klbl">Mejor FGR</div><div class="kval" style="font-size:16px;">${mejor?mejor.fgrVal:'—'}</div><div class="kdesc">${mejor?mejor.emp.sucursal:'Sin datos suficientes'}</div></div>
+    </div>
+    <div class="sec"><div class="sec-num" style="background:#0F4C81;">1</div><div class="sec-title">Factor de Generación de Residuos por obra</div><div class="sec-line"></div></div>
+    <table>
+      <thead><tr>
+        <th class="tl">Obra</th><th>Primer Registro</th><th>Último Registro</th><th>Total M3</th><th>M2 Construidos</th><th>FGR</th>
+      </tr></thead>
+      <tbody>${filasHtml}</tbody>
+    </table>
+  `;
+
+  const fullHtml = '<!DOCTYPE html><html><head>'
+    +'<meta charset="UTF-8">'
+    +'<title>FGR · '+EMPRESA_NOMBRE+' · '+fecha+'</title>'
+    +'<style>'
+    +CSS
+    +'</style>'
+    +'</head><body>'+body
+    +'<div class="footer"><span>Recylink · Portal de Trazabilidad</span>'
+    +'<span>'+EMPRESA_NOMBRE+' · Comparativa FGR</span>'
+    +'<span>Generado el '+fecha+'</span></div>'
+    +'<script>window.onload=function(){setTimeout(function(){window.print();},400);}<\/script>'
+    +'</body></html>';
+  const blob = new Blob([fullHtml], {type:'text/html;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.target = '_blank'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(url), 5000);
 }
 function mnSetFiltro(f){ mnFilter = f; renderMain(); }
 function mnToggleCfg(){ mnCfgOpen = !mnCfgOpen; renderMain(); }
