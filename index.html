@@ -2997,14 +2997,18 @@ function exportarFGRExcel(){
   const rows = [
     ['Obra', 'Primer Registro', 'Último Registro', 'Total M3', 'M2 Construidos', 'FGR (m3/m2)']
   ];
+  // Los numeros se formatean con coma decimal ("es-CL") en vez del punto
+  // que usa JS por defecto — con la configuracion regional en español,
+  // Excel espera coma como separador decimal y si ve un punto interpreta
+  // el valor como texto, no como numero.
   filas.forEach(function(f){
     rows.push([
       f.emp.sucursal,
       f.fgrData.primerRegistro || '',
       f.fgrData.ultimoRegistro || '',
-      f.tieneM3 ? f.fgrData.totalM3 : '',
-      (f.m2!=null && f.m2!=='') ? f.m2 : '',
-      f.fgrVal!==null ? f.fgrVal : ''
+      f.tieneM3 ? f.fgrData.totalM3.toLocaleString('es-CL',{maximumFractionDigits:2}) : '',
+      (f.m2!=null && f.m2!=='') ? f.m2.toLocaleString('es-CL',{maximumFractionDigits:2}) : '',
+      f.fgrVal!==null ? f.fgrVal.toLocaleString('es-CL',{maximumFractionDigits:3}) : ''
     ]);
   });
   const bom  = '﻿';
