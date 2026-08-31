@@ -3060,6 +3060,13 @@ function exportarFGRPDF(){
     +'<title>FGR · '+EMPRESA_NOMBRE+' · '+fecha+'</title>'
     +'<style>'
     +CSS
+    // Tabla de solo 6 columnas (menos densa que el informe de trazabilidad,
+    // que comparte el mismo CSS base) — se agranda la letra para que sea
+    // legible sin necesidad de zoom.
+    +`
+      table th { font-size: 11px; padding: 8px 10px; }
+      table td { font-size: 12px; padding: 8px 10px; }
+    `
     +'</style>'
     +'</head><body>'+body
     +'<div class="footer"><span>Recylink · Portal de Trazabilidad</span>'
