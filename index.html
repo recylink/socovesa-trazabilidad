@@ -3255,12 +3255,18 @@ window.addEventListener("beforeunload", (e) => {
 });
 
   const CSS = `
-    @page { size: legal portrait; margin: 16mm 14mm 12mm; }
+    /* margin:0 en @page (en vez de los mm de antes) es lo que hace que Chrome
+       oculte el encabezado/pie automatico de impresion (fecha, titulo, URL
+       del blob, "pagina X de Y") — con margen > 0 Chrome usa ese espacio
+       para dibujarlos; el margen visual del documento se replica con
+       padding en body en su lugar. */
+    @page { size: legal portrait; margin: 0; }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: -apple-system, 'Segoe UI', Arial, sans-serif;
       color: #1a1a2e; background: #fff;
       font-size: 8.5px; line-height: 1.5;
+      padding: 16mm 14mm 12mm;
     }
     @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
 
