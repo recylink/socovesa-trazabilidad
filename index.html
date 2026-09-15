@@ -3009,6 +3009,20 @@ function operacionesDelMes_(emp, mes){
   if (!m || !m.residuos || !m.residuos.length) return null;
   return m.residuos.reduce(function(s,r){ return s + (r.imp||0); }, 0);
 }
+// Clasificación de objetivos para el comparativo (a pedido del usuario,
+// 2026-09-15): FGR y "Registrar operaciones en forma unitaria" se sacan
+// por completo (no se les hace seguimiento acá); "Valorizar al menos un
+// residuo" muestra qué residuos se están valorizando (el detalle ya trae
+// esos nombres, sincronizado por valorizacion-recylink.html) en vez del %;
+// "Registrar residuos a valorizar" y "Registrar retiros de Respel" se
+// muestran como ✓/✗ en vez de %.
+function esFgrObj_(t){ return /\bfgr\b/i.test(t); }
+function esOperacionUnitariaObj_(t){ return /operaciones? en forma unitaria/i.test(t); }
+function esExcluidoComparativo_(t){ return esFgrObj_(t) || esOperacionUnitariaObj_(t); }
+function esValorizarAlMenosObj_(t){ return /valorizar al menos/i.test(t); }
+function esRegistrarValorizarObj_(t){ return /registrar residuos a valorizar/i.test(t); }
+function esRespelObj_(t){ return /respel/i.test(t); }
+
 function kpiRenderOverlay(){
   const sub = mnEl("kpiOverlaySub");
   if (sub) sub.textContent = mesActual + " " + anioSeleccionado + " · " + EMPRESAS.length + " obras";
@@ -3016,16 +3030,27 @@ function kpiRenderOverlay(){
   if (!body) return;
 
   // Columnas de objetivo: unión de los textos que aparezcan en cualquier
-  // obra (normalmente el mismo set para todas, viene de "Objetivos 2026").
+  // obra (normalmente el mismo set para todas, viene de "Objetivos 2026"),
+  // sin FGR ni "operaciones en forma unitaria".
   const nombresObjetivos = [];
   EMPRESAS.forEach(function(emp){
     estadoObjetivosVisibles(emp, mesActual).forEach(function(o){
+      if (esExcluidoComparativo_(o.texto)) return;
       if (nombresObjetivos.indexOf(o.texto) === -1) nombresObjetivos.push(o.texto);
     });
   });
+  // "Registrar residuos a valorizar" queda justo al lado de "Valorizar al
+  // menos un residuo", sin importar el orden en que vengan de "Objetivos 2026".
+  const idxRegistrar = nombresObjetivos.findIndex(esRegistrarValorizarObj_);
+  const idxValorizar = nombresObjetivos.findIndex(esValorizarAlMenosObj_);
+  if (idxRegistrar !== -1 && idxValorizar !== -1 && idxRegistrar !== idxValorizar + 1) {
+    const textoRegistrar = nombresObjetivos.splice(idxRegistrar, 1)[0];
+    const nuevoIdxValorizar = nombresObjetivos.findIndex(esValorizarAlMenosObj_);
+    nombresObjetivos.splice(nuevoIdxValorizar + 1, 0, textoRegistrar);
+  }
 
   const filas = EMPRESAS.map(function(emp){
-    const objs = estadoObjetivosVisibles(emp, mesActual);
+    const objs = estadoObjetivosVisibles(emp, mesActual).filter(function(o){ return !esExcluidoComparativo_(o.texto); });
     const objByTexto = {};
     objs.forEach(function(o){ objByTexto[o.texto] = o; });
     const objsConDato = objs.filter(function(o){ return !o.sinDato; });
@@ -3033,10 +3058,24 @@ function kpiRenderOverlay(){
     return { emp: emp, objByTexto: objByTexto, objOk: objOk, objTot: objsConDato.length, ops: operacionesDelMes_(emp, mesActual) };
   });
 
+  function celdaCheck(o){
+    if (!o || o.sinDato) return '<span style="color:var(--g300);">—</span>';
+    return o.ok ? '<span style="color:var(--ok);font-weight:700;">✓</span>' : '<span style="color:var(--err);font-weight:700;">✗</span>';
+  }
+  function celdaResiduos(o){
+    if (!o || o.sinDato) return '<span style="color:var(--g300);">—</span>';
+    const col = o.ok ? 'var(--ok)' : 'var(--err)';
+    return '<span style="color:'+col+';font-weight:600;font-size:10.5px;white-space:normal;">'+mnEscapeHtml(o.detalle || (o.ok?'Sí':'No'))+'</span>';
+  }
   function celdaObjetivo(o){
     if (!o || o.sinDato) return '<span style="color:var(--g300);">—</span>';
     const col = o.ok ? 'var(--ok)' : (o.avance >= o.metaNum*0.7 ? 'var(--warn)' : 'var(--err)');
     return '<span style="color:'+col+';font-weight:700;">'+(o.ok?'✓':'✗')+' '+o.avance+'%</span>';
+  }
+  function celdaPara(texto, o){
+    if (esValorizarAlMenosObj_(texto)) return celdaResiduos(o);
+    if (esRegistrarValorizarObj_(texto) || esRespelObj_(texto)) return celdaCheck(o);
+    return celdaObjetivo(o);
   }
 
   body.innerHTML = '<table class="kpi-cmp-table">'
@@ -3050,7 +3089,7 @@ function kpiRenderOverlay(){
         return '<tr>'
           + '<td>'+(f.emp.sucursal||f.emp.id)+'</td>'
           + '<td>'+(f.ops===null?'<span style="color:var(--g300);">—</span>':f.ops)+'</td>'
-          + nombresObjetivos.map(function(t){ return '<td>'+celdaObjetivo(f.objByTexto[t])+'</td>'; }).join("")
+          + nombresObjetivos.map(function(t){ return '<td>'+celdaPara(t, f.objByTexto[t])+'</td>'; }).join("")
           + '<td style="font-weight:700;color:'+objCol+';">'+f.objOk+'/'+f.objTot+'</td>'
           + '</tr>';
       }).join("")
