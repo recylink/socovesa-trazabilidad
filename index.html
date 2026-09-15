@@ -194,6 +194,14 @@ tr:hover td{background:var(--g25);}
 
 /* ── MINUTAS (integrado al visor) ── */
 .mn-sb-empty{padding:14px 16px;font-size:11.5px;color:var(--tx2);line-height:1.5;}
+.mn-newbtn{cursor:pointer;color:var(--g400);font-size:15px;line-height:1;}
+.mn-newbtn:hover{color:var(--brand);}
+.mn-newpanel{display:none;padding:10px 14px;border-bottom:1px solid var(--bd);background:var(--g50);}
+.mn-newpanel.open{display:block;}
+.mn-newpanel label{display:block;font-size:10px;font-weight:700;color:var(--g700);margin:6px 0 3px;}
+.mn-newpanel label:first-child{margin-top:0;}
+.mn-newpanel input,.mn-newpanel select{width:100%;padding:6px 8px;border:1.5px solid var(--bd);border-radius:6px;font-family:inherit;font-size:11px;color:var(--tx);background:#fff;outline:none;}
+.mn-newpanel .mn-newactions{display:flex;gap:6px;margin-top:8px;}
 .mn-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
 .mn-topbtn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border:1.5px solid var(--bd);border-radius:8px;font-family:inherit;font-size:11.5px;font-weight:600;color:var(--g700);background:#fff;cursor:pointer;transition:all .12s;}
 .mn-topbtn:hover{border-color:var(--brand);color:var(--brand);}
@@ -2678,6 +2686,12 @@ function mnFormatTitle(raw){
   if (iso) return `${iso[3]}/${iso[2]}/${iso[1]}`;
   return s.trim();
 }
+function mnBuildTitle(base, tipo, sucursal){
+  let t = (base || "").trim();
+  if (tipo === "central") t += " · Oficina Central";
+  else if (tipo === "sucursal" && sucursal) t += " · Obra: " + sucursal;
+  return t;
+}
 function mnRowsToSessions(rows){
   const out = [];
   let i = 0;
@@ -3200,11 +3214,71 @@ function mnGuardarScriptUrl(){
 }
 
 // ---------- Render sidebar ----------
+// ---------- Nueva minuta ----------
+let mnNuevaOpen = false;
+function mnToggleNueva(){ mnNuevaOpen = !mnNuevaOpen; renderSidebar(); }
+function mnOnNuevaTipoChange(v){
+  const wrap = mnEl("mnNuevaSucursalWrap");
+  if (wrap) wrap.style.display = v === "sucursal" ? "block" : "none";
+}
+function mnCrearNueva(){
+  const fechaInput = mnEl("mnNuevaFecha");
+  const tipoInput = mnEl("mnNuevaTipo");
+  const sucSelect = mnEl("mnNuevaSucursal");
+  const fecha = fechaInput ? fechaInput.value : "";
+  if (!fecha){ mnShowToast("Indica la fecha de la minuta.", true); return; }
+  const partes = fecha.split("-");
+  const base = "Minuta " + partes[2] + "/" + partes[1] + "/" + partes[0];
+  const tipo = tipoInput ? tipoInput.value : "";
+  const sucursal = tipo === "sucursal" ? (sucSelect ? sucSelect.value : "") : null;
+  if (tipo === "sucursal" && !sucursal){ mnShowToast("Selecciona la obra.", true); return; }
+  const title = mnBuildTitle(base, tipo || null, sucursal);
+  if (mnSessions.some(function(s){ return s.title.trim().toLowerCase() === title.trim().toLowerCase(); })){
+    mnShowToast("Ya existe una minuta con esa fecha y tipo.", true); return;
+  }
+  mnSessions.push({ headerRow: null, title: title, items: [] });
+  mnActiveIdx = mnSessions.length - 1;
+  mnFilter = "todos";
+  mnNuevaOpen = false;
+  mnMarkDirty();
+  vistaGlobal = "minutas";
+  renderSidebar(); renderMain(); mnUpdateAccessBtn(); fgrUpdateAccessBtn();
+  mnShowToast("Minuta creada — agrega ítems y se guardará sola en el Sheet.");
+}
+function mnNuevaPanelHtml(){
+  if (!mnNuevaOpen) return "";
+  const hoy = new Date().toISOString().slice(0,10);
+  const obras = (typeof EMPRESAS !== "undefined" ? EMPRESAS : []);
+  return '<div class="mn-newpanel open">'
+    +'<label>Fecha</label>'
+    +'<input type="date" id="mnNuevaFecha" value="'+hoy+'">'
+    +'<label>Tipo de reunión</label>'
+    +'<select id="mnNuevaTipo" onchange="mnOnNuevaTipoChange(this.value)">'
+    +'<option value="central">Oficina Central</option>'
+    +'<option value="sucursal">Obra</option>'
+    +'</select>'
+    +'<div id="mnNuevaSucursalWrap" style="display:none;">'
+    +'<label>Obra</label>'
+    +'<select id="mnNuevaSucursal">'
+    +obras.map(function(e){ return '<option value="'+mnEscapeHtml(e.sucursal)+'">'+mnEscapeHtml(e.sucursal)+'</option>'; }).join("")
+    +'</select>'
+    +'</div>'
+    +'<div class="mn-newactions">'
+    +'<button class="mn-topbtn primary" type="button" onclick="mnCrearNueva()">Crear minuta</button>'
+    +'<button class="mn-topbtn" type="button" onclick="mnToggleNueva()">Cancelar</button>'
+    +'</div>'
+    +'</div>';
+}
+
 function mnSidebarHtml(){
   let html = `<div class="sb-section" style="display:flex;justify-content:space-between;align-items:center;">
     <span>Minutas</span>
+    <span style="display:flex;gap:10px;align-items:center;">
+    <span class="mn-newbtn" title="Nueva minuta" onclick="event.stopPropagation();mnToggleNueva();">＋</span>
     <span style="cursor:pointer;color:var(--g400);" title="Actualizar minutas" onclick="event.stopPropagation();mnFetchSheet(false);">↻</span>
+    </span>
   </div>`;
+  html += mnNuevaPanelHtml();
   if (!mnSessions.length){
     html += `<div class="mn-sb-empty">${mnStatus.state==="err" ? "No se pudo cargar la pestaña 'Minuta'." : "Cargando minutas…"}</div>`;
     return html;
