@@ -242,6 +242,13 @@ tr.mn-done .mn-cell-textarea{color:var(--g400);}
 .export-overlay{display:none;position:fixed;inset:0;background:rgba(16,24,40,.45);z-index:500;align-items:center;justify-content:center;}
 .export-overlay.open{display:flex;}
 .export-modal{background:#fff;border-radius:14px;padding:28px;width:380px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.18);}
+.kpi-modal{background:#fff;border-radius:14px;padding:24px;width:1100px;max-width:95vw;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.18);}
+.kpi-cmp-table{border-collapse:collapse;width:100%;min-width:920px;}
+.kpi-cmp-table th{padding:8px 10px;font-size:9.5px;font-weight:700;color:var(--tx2);text-align:center;border-bottom:1px solid var(--bd);background:var(--g50);text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;}
+.kpi-cmp-table th:first-child{text-align:left;}
+.kpi-cmp-table td{padding:8px 10px;font-size:11.5px;text-align:center;border-bottom:1px solid var(--g100);white-space:nowrap;}
+.kpi-cmp-table td:first-child{text-align:left;font-weight:600;color:var(--g700);}
+.kpi-cmp-table tr:last-child td{border-bottom:none;}
 .export-modal-title{font-size:15px;font-weight:700;color:var(--g900);margin-bottom:4px;}
 .export-modal-sub{font-size:12px;color:var(--tx2);margin-bottom:20px;}
 .export-opt{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1.5px solid var(--bd);border-radius:10px;margin-bottom:10px;cursor:pointer;transition:all .12s;}
@@ -391,6 +398,9 @@ tr.mn-done .mn-cell-textarea{color:var(--g400);}
     <button class="mn-topbtn" id="fgrAccessBtn" type="button" onclick="fgrToggleVista()" style="height:34px;">
       📐 <span id="fgrAccessBtnLabel">FGR</span>
     </button>
+    <button class="mn-topbtn" type="button" onclick="kpiToggleOverlay()" style="height:34px;">
+      📊 Comparar objetivos
+    </button>
 
     <!-- ACCESO A MINUTAS -->
     <button class="mn-topbtn ${''}" id="mnAccessBtn" type="button" onclick="mnToggleVista()" style="height:34px;">
@@ -428,6 +438,16 @@ tr.mn-done .mn-cell-textarea{color:var(--g400);}
       </div>
     </div>
     <button class="export-cancel" onclick="cerrarExport()">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL COMPARATIVO DE OBJETIVOS -->
+<div class="export-overlay" id="kpiOverlay" onclick="if(event.target===this)kpiToggleOverlay()">
+  <div class="kpi-modal">
+    <div class="export-modal-title">Comparativo de objetivos por obra</div>
+    <div class="export-modal-sub" id="kpiOverlaySub"></div>
+    <div style="overflow-x:auto;"><div id="kpiOverlayBody"></div></div>
+    <button class="export-cancel" onclick="kpiToggleOverlay()">Cerrar</button>
   </div>
 </div>
 
@@ -2323,7 +2343,7 @@ function setEmpDesdeSelect(id){
 function setEmp(id){ empActual=id; filtroActual="todos"; vistaActual="mensual"; vistaGlobal="empresa"; renderSidebar(); renderMain(); buildSucursalSelect(); mnUpdateAccessBtn(); fgrUpdateAccessBtn(); }
 function setVista(v){  vistaActual=v; renderMain(); }
 function setFiltro(f){ filtroActual=f; renderMain(); }
-function setMes(m){    mesActual=m;   filtroActual="todos"; renderSidebar(); renderMain(); }
+function setMes(m){    mesActual=m;   filtroActual="todos"; renderSidebar(); renderMain(); if (kpiOpen) kpiRenderOverlay(); }
 
 
 // ============================================================
@@ -2517,6 +2537,7 @@ function cargarDatos(esRefrescoSilencioso){
     renderMain();
     buildEmpresaSelect();
     buildSucursalSelect();
+    if (kpiOpen) kpiRenderOverlay();
   };
 
   const scriptTag = document.createElement("script");
@@ -2950,6 +2971,76 @@ function fgrUpdateAccessBtn(){
     btn.classList.remove("primary");
     lbl.textContent = "FGR";
   }
+}
+
+// ============================================================
+// COMPARATIVO DE OBJETIVOS (a pedido del usuario, 2026-09-15) — mismo
+// patrón que el "Comparar KPIs" de seguimiento-Euro/index.html, adaptado a
+// los objetivos reales de Socovesa (vienen de "Objetivos 2026", el mismo
+// set de textos para todas las obras — ver construirEmpresas_ en
+// Code-Socovesa.gs) más un contador de operaciones del mes.
+// ============================================================
+let kpiOpen = false;
+function kpiToggleOverlay(){
+  kpiOpen = !kpiOpen;
+  const el = mnEl("kpiOverlay");
+  if (el) el.className = "export-overlay" + (kpiOpen ? " open" : "");
+  if (kpiOpen) kpiRenderOverlay();
+}
+// Operaciones registradas en el mes para esta obra: suma de "Importaciones"
+// de todos los residuos de ese mes (mismo dato que ya usa "📋 Mensual
+// detallado" por residuo, acá sumado para dar un total por obra).
+function operacionesDelMes_(emp, mes){
+  const m = emp.mensual && emp.mensual[mes];
+  if (!m || !m.residuos || !m.residuos.length) return null;
+  return m.residuos.reduce(function(s,r){ return s + (r.imp||0); }, 0);
+}
+function kpiRenderOverlay(){
+  const sub = mnEl("kpiOverlaySub");
+  if (sub) sub.textContent = mesActual + " " + anioSeleccionado + " · " + EMPRESAS.length + " obras";
+  const body = mnEl("kpiOverlayBody");
+  if (!body) return;
+
+  // Columnas de objetivo: unión de los textos que aparezcan en cualquier
+  // obra (normalmente el mismo set para todas, viene de "Objetivos 2026").
+  const nombresObjetivos = [];
+  EMPRESAS.forEach(function(emp){
+    estadoObjetivosVisibles(emp, mesActual).forEach(function(o){
+      if (nombresObjetivos.indexOf(o.texto) === -1) nombresObjetivos.push(o.texto);
+    });
+  });
+
+  const filas = EMPRESAS.map(function(emp){
+    const objs = estadoObjetivosVisibles(emp, mesActual);
+    const objByTexto = {};
+    objs.forEach(function(o){ objByTexto[o.texto] = o; });
+    const objsConDato = objs.filter(function(o){ return !o.sinDato; });
+    const objOk = objsConDato.filter(function(o){ return o.ok; }).length;
+    return { emp: emp, objByTexto: objByTexto, objOk: objOk, objTot: objsConDato.length, ops: operacionesDelMes_(emp, mesActual) };
+  });
+
+  function celdaObjetivo(o){
+    if (!o || o.sinDato) return '<span style="color:var(--g300);">—</span>';
+    const col = o.ok ? 'var(--ok)' : (o.avance >= o.metaNum*0.7 ? 'var(--warn)' : 'var(--err)');
+    return '<span style="color:'+col+';font-weight:700;">'+(o.ok?'✓':'✗')+' '+o.avance+'%</span>';
+  }
+
+  body.innerHTML = '<table class="kpi-cmp-table">'
+    + '<thead><tr>'
+    + '<th>Obra</th><th>Operaciones del mes</th>'
+    + nombresObjetivos.map(function(t){ return '<th>'+t+'</th>'; }).join("")
+    + '<th>Objetivos</th>'
+    + '</tr></thead><tbody>'
+    + filas.map(function(f){
+        const objCol = f.objTot===0 ? 'var(--g300)' : (f.objOk>=f.objTot?'var(--ok)':f.objOk>=f.objTot*.5?'var(--warn)':'var(--err)');
+        return '<tr>'
+          + '<td>'+(f.emp.sucursal||f.emp.id)+'</td>'
+          + '<td>'+(f.ops===null?'<span style="color:var(--g300);">—</span>':f.ops)+'</td>'
+          + nombresObjetivos.map(function(t){ return '<td>'+celdaObjetivo(f.objByTexto[t])+'</td>'; }).join("")
+          + '<td style="font-weight:700;color:'+objCol+';">'+f.objOk+'/'+f.objTot+'</td>'
+          + '</tr>';
+      }).join("")
+    + '</tbody></table>';
 }
 function renderFGRGlobal(){
   document.getElementById("main").innerHTML = `
