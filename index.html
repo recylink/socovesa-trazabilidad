@@ -639,22 +639,64 @@ const EMPRESAS = [];
 const PENDIENTES_STORE = {};
 
 // ============================================================
-// FGR — m2 construidos (dato manual, no hay hoja fuente para esto todavia)
-// Se guarda en localStorage por obra (empId) para que sobreviva un refresh.
+// FGR — m2 construidos y tipo de obra (Vivienda en extensión / Edificio)
+// Se guardan en el Sheet ("⚙️ FGR Datos Obra", ver Code-Socovesa.gs) en vez
+// de localStorage — mismo motivo que Sucursales Cerradas/Objetivos
+// Dormidos: localStorage se pierde si el navegador borra datos del sitio.
 // El total en m3 y las fechas de primer/ultimo registro SI vienen del
-// backend (hoja "Total Residuos", ver emp.fgr) — solo m2 es editable aca.
+// backend (hoja "Total Residuos", ver emp.fgr) — m2/tipo llegan en
+// TODAS_OBRAS_FGR (campos "m2"/"tipoObra") y se editan acá.
+// TIPO_OBRA_BUFFER guarda ediciones de tipo aún no guardadas (el botón
+// cicla el valor en el navegador; recién se persiste al hacer clic en
+// "Guardar", junto con m2, para no disparar un POST por cada clic).
 // ============================================================
-const FGR_M2_LS_KEY = "socovesa_fgr_m2_construidos";
-let FGR_M2_STORE = {};
-try { FGR_M2_STORE = JSON.parse(localStorage.getItem(FGR_M2_LS_KEY) || "{}"); } catch(e) { FGR_M2_STORE = {}; }
-function getM2Construidos(empId){ return FGR_M2_STORE[empId] ?? null; }
-function guardarM2Construidos(empId){
+const TIPOS_OBRA = ["Vivienda en extensión", "Edificio"];
+let TIPO_OBRA_BUFFER = {};
+function getM2Construidos(empId){
+  const e = TODAS_OBRAS_FGR.find(o=>o.id===empId);
+  return e?.m2 ?? null;
+}
+function getTipoObra(empId){
+  if (Object.prototype.hasOwnProperty.call(TIPO_OBRA_BUFFER, empId)) return TIPO_OBRA_BUFFER[empId];
+  const e = TODAS_OBRAS_FGR.find(o=>o.id===empId);
+  return e?.tipoObra || "";
+}
+function ciclarTipoObra(empId){
+  const actual = getTipoObra(empId);
+  const idx = TIPOS_OBRA.indexOf(actual);
+  TIPO_OBRA_BUFFER[empId] = idx===-1 ? TIPOS_OBRA[0] : TIPOS_OBRA[(idx+1)%TIPOS_OBRA.length];
+  renderMain();
+}
+async function guardarM2Construidos(empId){
   const inp = document.getElementById("fgrM2Input_"+empId);
   if(!inp) return;
   const val = parseFloat(inp.value);
   if(isNaN(val) || val<=0){ inp.focus(); return; }
-  FGR_M2_STORE[empId] = val;
-  try { localStorage.setItem(FGR_M2_LS_KEY, JSON.stringify(FGR_M2_STORE)); } catch(e){}
+  const tipoObra = getTipoObra(empId);
+  // Se reenvía el estado completo de TODAS las obras (m2 + tipo), no solo
+  // la editada — mismo criterio de "reemplazo total" que Sucursales
+  // Cerradas/Objetivos Dormidos, ya que el backend guarda la hoja completa.
+  const filas = TODAS_OBRAS_FGR.map(o=>{
+    const m2Val = o.id===empId ? val : (o.m2 ?? "");
+    const tipoVal = o.id===empId ? tipoObra : getTipoObra(o.id);
+    return [o.sucursal, m2Val, tipoVal];
+  });
+  const btn = document.querySelector(`button[onclick="guardarM2Construidos('${empId}')"]`);
+  if(btn){ btn.disabled = true; btn.textContent = "Guardando…"; }
+  try {
+    const res = await fetch(DATA_SOURCE_URL, {
+      method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" },
+      body: JSON.stringify({ tipo:"fgrDatosObra", filas })
+    });
+    let json; try { json = await res.json(); } catch(e){ throw new Error("Respuesta no-JSON del Apps Script"); }
+    if (json.ok === false) throw new Error(json.error || "Error desconocido");
+    const e = TODAS_OBRAS_FGR.find(o=>o.id===empId);
+    if (e){ e.m2 = val; e.tipoObra = tipoObra; }
+    delete TIPO_OBRA_BUFFER[empId];
+  } catch(err){
+    console.error("No se pudo guardar m2/tipo de obra:", err);
+    alert("No se pudo guardar en el Sheet: " + err.message);
+  }
   renderMain();
 }
 
@@ -1867,11 +1909,13 @@ function renderValorizacion(emp){
 }
 
 // ============================================================
-// FGR — obra, primer/ultimo registro de residuos, total m3, m2
-// construidos (editable) y FGR = total m3 / m2 construidos.
+// FGR — obra, primer/ultimo registro de residuos, total m3, tipo de obra,
+// m2 construidos (editable) y FGR = total m3 / m2 construidos.
 // El total m3 y las fechas de registro vienen del backend (emp.fgr, leido
-// de la hoja "Total Residuos"); m2 construidos es manual (localStorage,
-// ver FGR_M2_STORE) porque hoy no existe una hoja fuente para ese dato.
+// de la hoja "Total Residuos"); m2/tipo de obra se editan acá y se guardan
+// en el Sheet ("⚙️ FGR Datos Obra", ver getM2Construidos/getTipoObra).
+// Incluye también las obras cerradas (marcadas con la etiqueta "CERRADA"),
+// a diferencia del sidebar que sí las oculta.
 // ============================================================
 // Tabla comparativa entre TODAS las obras (no solo la seleccionada) — a
 // pedido del usuario, para poder comparar FGR entre proyectos de un vistazo.
@@ -1920,6 +1964,7 @@ function renderFGR(){
             <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:left;border-bottom:1px solid var(--bd);">PRIMER REGISTRO</th>
             <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:left;border-bottom:1px solid var(--bd);">ÚLTIMO REGISTRO</th>
             <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:right;border-bottom:1px solid var(--bd);">TOTAL M3</th>
+            <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:center;border-bottom:1px solid var(--bd);min-width:150px;">TIPO OBRA</th>
             <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:right;border-bottom:1px solid var(--bd);min-width:160px;">M2 CONSTRUIDOS</th>
             <th style="padding:8px 12px;font-size:10px;font-weight:700;color:var(--tx2);text-align:right;border-bottom:1px solid var(--bd);">FGR</th>
           </tr></thead>
@@ -1929,11 +1974,17 @@ function renderFGR(){
               const bg = esActual ? 'background:#EBF5FC;' : (i%2 ? 'background:var(--g25);' : '');
               const m3Fmt = f.tieneM3 ? f.fgrData.totalM3.toLocaleString('es-CL',{maximumFractionDigits:2}) : "&#8212;";
               const fgrFmt = f.fgrVal===null ? "&#8212;" : f.fgrVal.toLocaleString('es-CL',{maximumFractionDigits:3});
-              return `<tr style="${bg}">
-                <td style="padding:9px 14px;font-size:12px;font-weight:${esActual?'700':'500'};color:${esActual?'var(--brand)':'var(--g800)'};">${f.emp.sucursal}</td>
+              const cerradaTag = f.cerrada ? ' <span style="font-size:9px;font-weight:700;color:var(--g400);border:1px solid var(--bd);border-radius:4px;padding:1px 5px;">CERRADA</span>' : '';
+              const tipoLbl = f.tipoObra || "Definir tipo";
+              const tipoCol = f.tipoObra ? (f.tipoObra===TIPOS_OBRA[1] ? '#0F4C81' : '#7C4DFF') : 'var(--g400)';
+              return `<tr style="${bg}${f.cerrada?'opacity:.65;':''}">
+                <td style="padding:9px 14px;font-size:12px;font-weight:${esActual?'700':'500'};color:${esActual?'var(--brand)':'var(--g800)'};">${f.emp.sucursal}${cerradaTag}</td>
                 <td style="padding:9px 12px;font-size:12px;color:var(--g600);">${f.fgrData.primerRegistro || "&#8212;"}</td>
                 <td style="padding:9px 12px;font-size:12px;color:var(--g600);">${f.fgrData.ultimoRegistro || "&#8212;"}</td>
                 <td style="padding:9px 12px;font-size:12px;font-weight:700;color:var(--g800);text-align:right;">${m3Fmt}</td>
+                <td style="padding:6px 12px;text-align:center;">
+                  <button class="pend-btn" style="margin-top:0;padding:4px 10px;font-size:10px;background:transparent;border:1.5px solid ${tipoCol};color:${tipoCol};" onclick="ciclarTipoObra('${f.emp.id}')" title="Click para cambiar">${tipoLbl}</button>
+                </td>
                 <td style="padding:6px 12px;text-align:right;">
                   <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px;">
                     <input type="number" min="0" step="0.01" id="fgrM2Input_${f.emp.id}" value="${f.m2??''}" placeholder="m2"
@@ -3127,9 +3178,10 @@ function computeFGRFilas_(){
   const filas = TODAS_OBRAS_FGR.map(function(e){
     const fgrData = e.fgr || { totalM3: 0, primerRegistro: null, ultimoRegistro: null };
     const m2 = getM2Construidos(e.id);
+    const tipoObra = getTipoObra(e.id);
     const tieneM3 = fgrData.totalM3 > 0;
     const fgrVal = (m2 && m2>0 && tieneM3) ? Math.round(fgrData.totalM3/m2*1000)/1000 : null;
-    return { emp:e, fgrData, m2, fgrVal, tieneM3 };
+    return { emp:e, fgrData, m2, tipoObra, fgrVal, tieneM3, cerrada: !!e.cerrada };
   });
   const totalM3Global = filas.reduce((s,f)=>s+(f.fgrData.totalM3||0),0);
   const conFgr = filas.filter(f=>f.fgrVal!==null);
@@ -3142,7 +3194,7 @@ function computeFGRFilas_(){
 function exportarFGRExcel(){
   const { filas } = computeFGRFilas_();
   const rows = [
-    ['Obra', 'Primer Registro', 'Último Registro', 'Total M3', 'M2 Construidos', 'FGR (m3/m2)']
+    ['Obra', 'Primer Registro', 'Último Registro', 'Total M3', 'Tipo Obra', 'M2 Construidos', 'FGR (m3/m2)']
   ];
   // Los numeros se formatean con coma decimal ("es-CL") en vez del punto
   // que usa JS por defecto — con la configuracion regional en español,
@@ -3154,6 +3206,7 @@ function exportarFGRExcel(){
       f.fgrData.primerRegistro || '',
       f.fgrData.ultimoRegistro || '',
       f.tieneM3 ? f.fgrData.totalM3.toLocaleString('es-CL',{maximumFractionDigits:2}) : '',
+      f.tipoObra || '',
       (f.m2!=null && f.m2!=='') ? f.m2.toLocaleString('es-CL',{maximumFractionDigits:2}) : '',
       f.fgrVal!==null ? f.fgrVal.toLocaleString('es-CL',{maximumFractionDigits:3}) : ''
     ]);
@@ -3185,10 +3238,11 @@ function exportarFGRPDF(){
     const m2Fmt  = (f.m2!=null && f.m2!=='') ? f.m2 : '—';
     const fgrFmt = f.fgrVal===null ? '—' : f.fgrVal.toLocaleString('es-CL',{maximumFractionDigits:3});
     return `<tr class="${i%2?'even':''}">
-      <td class="tl">${f.emp.sucursal}</td>
+      <td class="tl">${f.emp.sucursal}${f.cerrada?' (cerrada)':''}</td>
       <td>${f.fgrData.primerRegistro || '—'}</td>
       <td>${f.fgrData.ultimoRegistro || '—'}</td>
       <td>${m3Fmt}</td>
+      <td>${f.tipoObra || '—'}</td>
       <td>${m2Fmt}</td>
       <td style="font-weight:700;color:#0F4C81;">${fgrFmt}</td>
     </tr>`;
@@ -3214,7 +3268,7 @@ function exportarFGRPDF(){
     <div class="sec"><div class="sec-num" style="background:#0F4C81;">1</div><div class="sec-title">Factor de Generación de Residuos por obra</div><div class="sec-line"></div></div>
     <table>
       <thead><tr>
-        <th class="tl">Obra</th><th>Primer Registro</th><th>Último Registro</th><th>Total M3</th><th>M2 Construidos</th><th>FGR</th>
+        <th class="tl">Obra</th><th>Primer Registro</th><th>Último Registro</th><th>Total M3</th><th>Tipo Obra</th><th>M2 Construidos</th><th>FGR</th>
       </tr></thead>
       <tbody>${filasHtml}</tbody>
     </table>
