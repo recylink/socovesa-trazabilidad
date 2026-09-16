@@ -1059,7 +1059,7 @@ function renderSidebar(){
     <div style="display:grid;grid-template-columns:1fr auto auto;gap:0;padding:6px 14px 4px;border-bottom:1px solid var(--bd);background:var(--g50);">
       <span style="font-size:9px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;">Sucursal</span>
       <span style="font-size:9px;font-weight:700;color:var(--brand);text-transform:uppercase;letter-spacing:.5px;text-align:center;min-width:40px;">Traz.</span>
-      <span style="font-size:9px;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.5px;text-align:center;min-width:44px;">Obj.</span>
+      <span style="font-size:9px;font-weight:700;color:var(--ok);text-transform:uppercase;letter-spacing:.5px;text-align:center;min-width:44px;">Val.</span>
     </div>`;
 
   html += EMPRESAS.map(emp=>{
@@ -1071,11 +1071,14 @@ function renderSidebar(){
     // Cualquier valor menor con datos cargados = rojo (no un degradado por rango).
     const tCol    = tieneOp ? ((trazo??0)>=100 ? 'var(--ok)' : 'var(--err)') : 'var(--err)';
 
-    // Cumplimiento de objetivos (Objetivos 2026), Enero → mes seleccionado
-    const evObj    = estadoObjetivosVisibles(emp, mesActual);
-    const objOk    = evObj.filter(o=>o.ok).length;
-    const objTot   = evObj.length;
-    const objCol   = objTot===0?'var(--g300)':objOk>=objTot?'var(--ok)':objOk>=objTot*.5?'var(--warn)':'var(--err)';
+    // % Valorización acumulado (SOLO dato real del Sheet), Enero → mes seleccionado
+    const vd      = VAL_DATA[emp.id];
+    const mi      = MESES.indexOf(mesActual);
+    const acumOrd = MESES.filter(m=>vd?.acumulado?.[m]!=null && MESES.indexOf(m)<=mi);
+    const ultimoAcum = acumOrd.slice(-1)[0];
+    const pValAc  = ultimoAcum!==undefined ? vd.acumulado[ultimoAcum] : null;
+    const metaV   = getMetaMes(emp.id, mesActual);
+    const valCol  = pValAc===null?'var(--g300)':metaV?(pValAc>=metaV?'var(--ok)':pValAc>=metaV*.7?'var(--warn)':'var(--err)'):colorPct(pValAc);
 
     return `<div class="sb-suc ${act?'active':''}" onclick="setEmp('${emp.id}')" style="display:grid;grid-template-columns:1fr auto auto;gap:4px;align-items:center;padding:7px 14px;">
       <div class="sb-suc-name" style="font-size:11px;font-weight:${act?700:500};color:${act?color:'var(--g700)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${emp.sucursal}</div>
@@ -1087,9 +1090,9 @@ function renderSidebar(){
             : '<span style="font-size:12px;font-weight:700;color:var(--err);">✗</span>'}
       </div>
       <div style="text-align:center;min-width:44px;">
-        ${objTot===0
+        ${pValAc===null
           ? '<span style="font-size:10px;color:var(--g300);">—</span>'
-          : '<span style="font-size:11px;font-weight:700;color:'+objCol+';">'+objOk+'/'+objTot+'</span>'}
+          : '<span style="font-size:11px;font-weight:700;color:'+valCol+';">'+pValAc+'%</span>'}
       </div>
     </div>`;
   }).join("");
