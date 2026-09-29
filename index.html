@@ -2789,6 +2789,36 @@ function mnRowsToSessions(rows){
   return out;
 }
 
+// ---------- Fecha para ordenar cronológicamente ----------
+// A pedido del usuario, 2026-09-29 ("por qué no se ordenan
+// cronológicamente?") — deliberadamente no se había portado esto al migrar
+// "＋ Nueva minuta" a Socovesa; ahora que se pidió explícito, se agrega el
+// mismo mecanismo ya usado en seguimiento-Euro/index.html.
+const MN_MESES_TXT = {enero:0,febrero:1,marzo:2,abril:3,mayo:4,junio:5,julio:6,agosto:7,septiembre:8,setiembre:8,octubre:9,noviembre:10,diciembre:11};
+function mnExtractDate(titulo){
+  let m = /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/.exec(titulo || "");
+  if (m) return new Date(+m[3], +m[2]-1, +m[1]);
+  m = /(\d{1,2})\s+de\s+([a-záéíóúñ]+)(?:\s+de\s+(\d{4}))?/i.exec(titulo || "");
+  if (m){
+    const mi = MN_MESES_TXT[m[2].toLowerCase()];
+    if (mi !== undefined) return new Date(m[3] ? +m[3] : new Date().getFullYear(), mi, +m[1]);
+  }
+  return null;
+}
+// Devuelve mnSessions con su índice original, ordenados más reciente primero
+// (las minutas sin fecha reconocible en el título quedan al final, en el
+// orden en que se agregaron).
+function mnSesionesOrdenadas(){
+  return mnSessions
+    .map(function(sess, idx){ return { sess: sess, idx: idx, d: mnExtractDate(sess.title) }; })
+    .sort(function(a, b){
+      if (a.d && b.d) return b.d - a.d;
+      if (a.d) return -1;
+      if (b.d) return 1;
+      return b.idx - a.idx;
+    });
+}
+
 function mnLoadConfig(){ try{ const raw = localStorage.getItem(MN_LS_SCRIPT); if (raw) mnScriptUrl = raw; }catch(e){} }
 function mnSaveConfig(){ try{ localStorage.setItem(MN_LS_SCRIPT, mnScriptUrl || ""); }catch(e){} }
 function mnLoadCachedData(){ try{ const raw = localStorage.getItem(MN_LS_DATA); if (raw) mnSessions = JSON.parse(raw); }catch(e){} }
@@ -3379,7 +3409,8 @@ function mnSidebarHtml(){
     html += `<div class="mn-sb-empty">${mnStatus.state==="err" ? "No se pudo cargar la pestaña 'Minuta'." : "Cargando minutas…"}</div>`;
     return html;
   }
-  mnSessions.forEach((sess, idx) => {
+  mnSesionesOrdenadas().forEach(o => {
+    const sess = o.sess, idx = o.idx;
     const total = sess.items.length;
     const done = sess.items.filter(i=>i.cumplido).length;
     const act = vistaGlobal === "minutas" && idx === mnActiveIdx;
